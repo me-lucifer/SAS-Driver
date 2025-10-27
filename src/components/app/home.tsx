@@ -39,9 +39,11 @@ export default function Home() {
       setSessionVehicle(vehicle);
 
       // Check if submission for today exists for this vehicle
-      const submissionToday = localStorage.getItem('submissionToday') === 'true';
-      const submissionVehicle = localStorage.getItem('submissionTodayVehicle');
-      if (submissionToday && submissionVehicle === vehicle.plate) {
+      const submissionDate = localStorage.getItem('submissionDate');
+      const submissionVehiclePlate = localStorage.getItem('submissionVehiclePlate');
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
+
+      if (submissionDate === todayStr && submissionVehiclePlate === vehicle.plate) {
           setOdometerSubmitted(true);
       } else {
           setOdometerSubmitted(false);
@@ -55,8 +57,8 @@ export default function Home() {
   const handleLogout = async () => {
     await auth.signOut();
     localStorage.removeItem('sessionVehicle');
-    localStorage.removeItem('submissionToday');
-    localStorage.removeItem('submissionTodayVehicle');
+    localStorage.removeItem('submissionDate');
+    localStorage.removeItem('submissionVehiclePlate');
     router.push('/welcome');
   };
 
@@ -99,13 +101,13 @@ export default function Home() {
 
       <main className="flex-1 overflow-y-auto p-4 space-y-6">
         {!sessionVehicle && (
-            <Card className="bg-amber-50 border-amber-200">
+            <Card className="bg-warning text-warning-foreground border-amber-300">
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                    <LinkIcon className="h-6 w-6 text-amber-600" />
-                    <CardTitle className="text-amber-900 text-lg">Link this session to a vehicle</CardTitle>
+                    <LinkIcon className="h-6 w-6" />
+                    <CardTitle className="text-lg">Link this session to a vehicle</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col items-start gap-4">
-                    <p className="text-amber-800">
+                    <p>
                         You must identify your vehicle to submit an odometer reading.
                     </p>
                     <Link href="/identify-vehicle" passHref>
@@ -142,7 +144,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                   <Button size="lg" className="w-full" disabled={!sessionVehicle}>
-                      Start
+                      Start Odometer Capture
                   </Button>
               </CardContent>
           </Card>

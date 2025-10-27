@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, Edit, QrCode, ArrowLeft } from "lucide-react";
 import { CameraView } from './camera-view';
@@ -26,12 +26,14 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 export default function IdentifyVehiclePage() {
+    const [activeTab, setActiveTab] = useState("scan-qr");
     const [identifiedVehicle, setIdentifiedVehicle] = useState<any>(null);
     const [manualPlate, setManualPlate] = useState('');
     const [existingSubmission, setExistingSubmission] = useState<any>(null);
     const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
     const { toast } = useToast();
     const router = useRouter();
+    const manualPlateInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const storedVehicle = localStorage.getItem('sessionVehicle');
@@ -40,11 +42,17 @@ export default function IdentifyVehiclePage() {
         }
     }, []);
 
+    useEffect(() => {
+        if (activeTab === 'manual') {
+            manualPlateInputRef.current?.focus();
+        }
+    }, [activeTab]);
+
 
     const checkForExistingSubmission = (plate: string) => {
         const today = format(new Date(), 'yyyy-MM-dd');
-        // This is a simplified check. A real app would also check mockSubmissions.
-        const submission = initialMockSubmissions.find(s => 
+        const storedSubmissions = JSON.parse(localStorage.getItem('mockSubmissions') || '[]');
+        const submission = [...initialMockSubmissions, ...storedSubmissions].find(s => 
             s.vehicle === plate && 
             s.date === today && 
             (s.status === 'Submitted' || s.status === 'Verified')
@@ -69,10 +77,10 @@ export default function IdentifyVehiclePage() {
             setShowDuplicateDialog(true);
         } else {
             toast({
+                variant: "success",
                 title: "Vehicle Identified",
                 description: `Vehicle ${vehicleData.plate} linked to this session.`
             });
-            // Set session vehicle in local storage
             localStorage.setItem('sessionVehicle', JSON.stringify(vehicleData));
             setIdentifiedVehicle(vehicleData);
         }
@@ -86,7 +94,6 @@ export default function IdentifyVehiclePage() {
     
     const handleScanSuccess = (scanResult: string) => {
         console.log("Scan successful:", scanResult);
-        // Simulate scanning one of the seeded vehicles
         const plates = Object.keys(mockVehicles);
         const randomPlate = plates[Math.floor(Math.random() * plates.length)];
         handleVehicleIdentification(randomPlate);
@@ -98,6 +105,7 @@ export default function IdentifyVehiclePage() {
         localStorage.setItem('sessionVehicle', JSON.stringify(vehicleData));
         setIdentifiedVehicle(vehicleData);
          toast({
+            variant: "success",
             title: "Vehicle Identified",
             description: `Vehicle ${vehicleData.plate} linked to this session.`
         });
@@ -107,6 +115,11 @@ export default function IdentifyVehiclePage() {
         localStorage.removeItem('sessionVehicle');
         setIdentifiedVehicle(null);
     }
+
+    const handleManualLinkClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setActiveTab('manual');
+    };
 
     if (identifiedVehicle) {
         return (
@@ -133,7 +146,7 @@ export default function IdentifyVehiclePage() {
                 <h1 className="text-xl font-bold ml-2">Identify Vehicle</h1>
             </header>
             <main className="flex-1 overflow-y-auto p-4">
-                <Tabs defaultValue="scan-qr" className="flex-1 flex flex-col">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="scan-qr"><QrCode className="mr-2 h-4 w-4" />Scan QR</TabsTrigger>
                         <TabsTrigger value="plate-ocr"><Camera className="mr-2 h-4 w-4" />Plate OCR</TabsTrigger>
@@ -144,7 +157,7 @@ export default function IdentifyVehiclePage() {
                     </TabsContent>
                     <TabsContent value="plate-ocr" className="mt-4 flex-1">
                         <CameraView guide="plate" onScanSuccess={handleScanSuccess}/>
-                         <Link href="#" className="text-sm text-center block mt-4 text-primary underline" onClick={() => (document.querySelector('[data-radix-collection-item][value="manual"]') as HTMLElement)?.click()}>
+                         <Link href="#" className="text-sm text-center block mt-4 text-primary underline" onClick={handleManualLinkClick}>
                             OCR failed? Enter manually
                         </Link>
                     </TabsContent>
@@ -156,6 +169,7 @@ export default function IdentifyVehiclePage() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <Input 
+                                    ref={manualPlateInputRef}
                                     placeholder="e.g., A 12345" 
                                     value={manualPlate}
                                     onChange={(e) => setManualPlate(e.target.value)}

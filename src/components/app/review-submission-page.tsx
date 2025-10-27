@@ -58,12 +58,13 @@ export default function ReviewSubmissionPage() {
             localStorage.setItem(storageKey, JSON.stringify(existingSubmissions));
 
             // Also mark today's submission as done in local storage to hide reminder
-            localStorage.setItem('submissionToday', 'true');
-            localStorage.setItem('submissionTodayVehicle', submissionData.vehicle.plate);
+            localStorage.setItem('submissionDate', format(new Date(), 'yyyy-MM-dd'));
+            localStorage.setItem('submissionVehiclePlate', submissionData.vehicle.plate);
 
             setIsSubmitted(true);
             
             toast({
+                variant: 'success',
                 title: 'Success!',
                 description: 'Your odometer reading has been submitted.',
             });
@@ -109,13 +110,13 @@ export default function ReviewSubmissionPage() {
 
             <main className="flex-1 overflow-y-auto p-4 space-y-4">
                 {submissionData.flags.length > 0 && (
-                    <Card className="bg-amber-50 border-amber-200">
+                     <Card className="bg-warning text-warning-foreground border-amber-300">
                         <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
-                             <TriangleAlert className="h-6 w-6 text-amber-600" />
-                             <CardTitle className="text-amber-900 text-lg">Flags Detected</CardTitle>
+                             <TriangleAlert className="h-6 w-6" />
+                             <CardTitle className="text-lg">Flags Detected</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-amber-800 mb-2">This submission will be flagged for review due to:</p>
+                            <p className="mb-2">This submission will be flagged for review due to:</p>
                             <div className="flex flex-wrap gap-2">
                                 {submissionData.flags.map((flag: string) => (
                                     <Badge key={flag} variant="destructive">{flag}</Badge>
