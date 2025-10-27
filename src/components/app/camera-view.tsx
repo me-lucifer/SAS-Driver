@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Camera, Loader2, Settings } from 'lucide-react';
-import Link from 'next/link';
 
 interface CameraViewProps {
     guide: 'qr' | 'plate';
@@ -17,9 +16,18 @@ export function CameraView({ guide, onScanSuccess }: CameraViewProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | undefined>(undefined);
     const [isScanning, setIsScanning] = useState(false);
+    const [isClient, setIsClient] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
+      setIsClient(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isClient) {
+            return;
+        }
+
         const getCameraPermission = async () => {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 console.error('Camera not supported on this browser.');
@@ -41,7 +49,6 @@ export function CameraView({ guide, onScanSuccess }: CameraViewProps) {
             } catch (error) {
                 console.error('Error accessing camera:', error);
                 setHasCameraPermission(false);
-                // No toast here, we show an inline error message now.
             }
         };
 
@@ -53,7 +60,7 @@ export function CameraView({ guide, onScanSuccess }: CameraViewProps) {
                 stream.getTracks().forEach(track => track.stop());
             }
         }
-    }, [toast]);
+    }, [isClient, toast]);
 
     const handleCapture = () => {
         setIsScanning(true);
@@ -65,6 +72,14 @@ export function CameraView({ guide, onScanSuccess }: CameraViewProps) {
     }
     
     const captureLabel = guide === 'qr' ? 'Capture QR Code' : 'Capture Plate Photo';
+
+    if (!isClient) {
+      return (
+        <div className="relative w-full aspect-[4/3] bg-black rounded-lg overflow-hidden flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+        </div>
+      );
+    }
 
     return (
         <div className="relative w-full aspect-[4/3] bg-black rounded-lg overflow-hidden flex items-center justify-center">
@@ -89,9 +104,6 @@ export function CameraView({ guide, onScanSuccess }: CameraViewProps) {
                         <AlertDescription className='mb-4'>
                             Please allow camera access in your browser settings to use this feature.
                         </AlertDescription>
-                        {/* The "Open Settings" button is a suggestion and might not work on all platforms/browsers.
-                            For a real app, platform-specific code would be needed. This is a progressive enhancement.
-                        */}
                         <Button variant="secondary" onClick={() => toast({ title: "Please open browser settings" })}>
                             <Settings className="mr-2 h-4 w-4" />
                             Open Settings
