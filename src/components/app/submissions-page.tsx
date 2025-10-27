@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -122,14 +121,14 @@ export default function SubmissionsPage() {
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input 
                                             placeholder="Search by plate..."
-                                            className="pl-9"
+                                            className="pl-9 h-10"
                                             value={search}
                                             onChange={(e) => setSearch(e.target.value)}
                                         />
                                     </div>
                                     <Popover>
                                         <PopoverTrigger asChild>
-                                            <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                            <Button variant="outline" className="w-full justify-start text-left font-normal h-10">
                                                 <CalendarIcon className="mr-2 h-4 w-4" />
                                                 {date ? format(date, 'PPP') : <span>Pick a date</span>}
                                             </Button>
@@ -156,7 +155,7 @@ export default function SubmissionsPage() {
                 <CardContent>
                     {offlineSubmissions.length > 0 && (
                         <div className="mb-4">
-                             <Button onClick={handleSync} disabled={!isOnline} className="w-full">
+                             <Button onClick={handleSync} disabled={!isOnline} className="w-full" size="lg">
                                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                                 Sync {offlineSubmissions.length} Offline Submission{offlineSubmissions.length > 1 ? 's' : ''}
                             </Button>
@@ -186,8 +185,8 @@ export default function SubmissionsPage() {
                     ) : (
                         <EmptyState 
                             icon={FileText}
-                            title="No submissions found"
-                            description="Your vehicle logs will appear here once you submit them."
+                            title="No Submissions Found"
+                            description="Your vehicle logs for the selected filters will appear here."
                         />
                     )}
                 </CardContent>

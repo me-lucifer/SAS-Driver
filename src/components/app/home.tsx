@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -45,7 +44,7 @@ export default function Home() {
         <ProfileDrawer user={user} onLogout={handleLogout} />
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-4">
+      <main className="flex-1 overflow-y-auto p-4 space-y-6">
         {!odometerSubmitted && (
             <Card className="bg-amber-50 border-amber-200">
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
@@ -72,7 +71,7 @@ export default function Home() {
                   </CardDescription>
               </CardHeader>
               <CardContent>
-                  <Button className="w-full">
+                  <Button size="lg" className="w-full">
                       Start
                   </Button>
               </CardContent>
@@ -91,7 +90,7 @@ export default function Home() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Button variant="secondary" className="w-full">
+                    <Button variant="secondary" size="lg" className="w-full">
                         View History
                     </Button>
                 </CardContent>

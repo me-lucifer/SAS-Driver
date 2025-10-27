@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -113,7 +112,7 @@ export default function ReviewSubmissionPage() {
 
             <Card className="overflow-hidden">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Photo</CardTitle>
+                    <CardTitle className="text-lg">Photo Thumbnail</CardTitle>
                 </CardHeader>
                 <CardContent>
                      <Image
@@ -127,9 +126,9 @@ export default function ReviewSubmissionPage() {
                 </CardContent>
             </Card>
 
-            <div className="p-4 space-y-4 bg-card rounded-lg border">
-                <div className="flex items-center space-x-3">
-                    <Checkbox id="confirmation" checked={isConfirmed} onCheckedChange={(checked) => setIsConfirmed(checked as boolean)} />
+            <div className="p-4 space-y-4 bg-card rounded-2xl border">
+                <div className="flex items-start space-x-3">
+                    <Checkbox id="confirmation" className="mt-1" checked={isConfirmed} onCheckedChange={(checked) => setIsConfirmed(checked as boolean)} />
                     <Label htmlFor="confirmation" className="font-medium text-sm leading-snug cursor-pointer">
                         I confirm that this odometer reading is accurate and was taken from the assigned vehicle.
                     </Label>

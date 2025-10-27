@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -50,7 +49,7 @@ export default function OdometerCapturePage() {
             <div className="p-4 space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Capture Odometer</CardTitle>
+                        <CardTitle>Capture Odometer Reading</CardTitle>
                         <CardDescription>
                             Position the camera over the odometer. Avoid glare and ensure the digits are centered.
                         </CardDescription>
@@ -126,12 +125,12 @@ export default function OdometerCapturePage() {
 
                 </CardContent>
                  <CardFooter className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" onClick={() => setCaptureState('capturing')}>
+                    <Button variant="outline" size="lg" onClick={() => setCaptureState('capturing')}>
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Retake
                     </Button>
                     <Link href={reviewLink} className="w-full">
-                        <Button className="w-full">
+                        <Button size="lg" className="w-full">
                             <Save className="mr-2 h-4 w-4" />
                             Save & Review
                         </Button>
