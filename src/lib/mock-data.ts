@@ -29,8 +29,8 @@ export const initialMockSubmissions: any[] = [
         id: '3',
         date: format(subDays(new Date(), 3), 'yyyy-MM-dd'),
         vehicle: 'B 67890',
-        odometer: 55600,
-        delta: 100,
+        odometer: 55950,
+        delta: 450,
         status: 'Flagged',
     },
 ];
@@ -48,6 +48,7 @@ export const mockSubmissionDetails: Record<string, any> = {
         ocr: { value: 25650, confidence: '99.1%' },
         edits: null,
         reviewerNotes: null,
+        flags: [],
         status: 'Verified',
         history: [
             { status: 'Verified', user: 'Admin', time: format(subDays(new Date(), 1), 'yyyy-MM-dd') + 'T09:15:00', icon: Check },
@@ -66,6 +67,7 @@ export const mockSubmissionDetails: Record<string, any> = {
         ocr: { value: 25432, confidence: '98.5%' },
         edits: null,
         reviewerNotes: null,
+        flags: [],
         status: 'Submitted',
         history: [
             { status: 'Submitted', user: 'Driver', time: format(subDays(new Date(), 2), 'yyyy-MM-dd') + 'T08:10:00', icon: Edit },
@@ -75,17 +77,18 @@ export const mockSubmissionDetails: Record<string, any> = {
         id: '3',
         dateTime: subDays(new Date(), 3),
         vehicle: { plate: 'B 67890', type: 'Truck' },
-        odometer: 55600,
-        delta: 100,
+        odometer: 55950,
+        delta: 450,
         photoUrl: 'https://picsum.photos/seed/sub3/600/400',
         location: 'Sohar, Oman',
         notes: 'Scratched during delivery.',
-        ocr: { value: 5560, confidence: '85.2%' },
-        edits: { reason: "OCR missed last digit", correctedValue: 55600 },
-        reviewerNotes: "Low OCR confidence. Please verify reading on next check-in.",
+        ocr: { value: 5595, confidence: '85.2%' },
+        edits: { reason: "OCR missed last digit", correctedValue: 55950 },
+        reviewerNotes: "Driver corrected OCR result. High delta flagged for review.",
         status: 'Flagged',
+        flags: ["Odo Δ high", "Low OCR"],
         history: [
-            { status: 'Flagged', user: 'Admin', time: format(subDays(new Date(), 3), 'yyyy-MM-dd') + 'T10:02:00', icon: FileWarning },
+            { status: 'Flagged', user: 'System', time: format(subDays(new Date(), 3), 'yyyy-MM-dd') + 'T07:59:00', icon: FileWarning },
             { status: 'Submitted', user: 'Driver', time: format(subDays(new Date(), 3), 'yyyy-MM-dd') + 'T07:58:00', icon: Edit },
         ]
     }
