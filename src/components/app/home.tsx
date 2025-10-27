@@ -81,25 +81,24 @@ export default function Home() {
         <ProfileDrawer user={user} onLogout={handleLogout} />
       </header>
 
-       {sessionVehicle && (
-        <div className="px-4 py-3 bg-muted border-b">
-          <Link href="/identify-vehicle" className="block">
-            <div className="flex justify-between items-center text-sm p-2 rounded-lg bg-card border shadow-sm cursor-pointer hover:bg-accent/50">
-                <div>
-                    <span className="text-muted-foreground">Vehicle: </span>
-                    <span className="font-semibold text-foreground">{sessionVehicle.plate}</span>
+      <main className="flex-1 overflow-y-auto p-4 space-y-5">
+        {sessionVehicle && (
+            <div className="mb-3">
+            <Link href="/identify-vehicle" className="block">
+                <div className="flex justify-between items-center text-sm p-2 rounded-lg bg-card border shadow-sm cursor-pointer hover:bg-accent/50">
+                    <div>
+                        <span className="text-muted-foreground">Vehicle: </span>
+                        <span className="font-semibold text-foreground">{sessionVehicle.plate}</span>
+                    </div>
+                    <Button variant="link" size="sm" className="h-auto p-0 text-primary">
+                        <Undo2 className="mr-1 h-3 w-3" />
+                        Change
+                    </Button>
                 </div>
-                <Button variant="link" size="sm" className="h-auto p-0 text-primary">
-                    <Undo2 className="mr-1 h-3 w-3" />
-                    Change
-                </Button>
+            </Link>
             </div>
-          </Link>
-        </div>
-      )}
+        )}
 
-
-      <main className="flex-1 overflow-y-auto p-4 space-y-6">
         {!sessionVehicle && (
             <Card className="bg-warning text-warning-foreground border-amber-300">
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
@@ -131,9 +130,10 @@ export default function Home() {
             </Card>
         )}
 
+        <div className="mb-5">
         <Link href={sessionVehicle ? `/odometer-capture?lastOdometer=${sessionVehicle.lastOdometer}&plate=${sessionVehicle.plate}&type=${sessionVehicle.type}` : "/identify-vehicle"} passHref>
-          <Card className="hover:bg-muted/50 hover:border-primary/50 transition-colors cursor-pointer">
-              <CardHeader>
+          <Card className="hover:bg-muted/50 hover:border-primary/50 transition-colors cursor-pointer rounded-xl shadow-sm">
+              <CardHeader className="p-4">
                   <CardTitle className="flex items-center gap-3">
                       <Camera className="h-6 w-6 text-primary" />
                       Odometer Capture
@@ -142,17 +142,18 @@ export default function Home() {
                       Capture and submit your vehicle's starting odometer reading for the day.
                   </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 pt-0">
                   <Button size="lg" className="w-full" disabled={!sessionVehicle}>
                       Start Odometer Capture
                   </Button>
               </CardContent>
           </Card>
         </Link>
+        </div>
         
         <Link href="/submissions" passHref>
-            <Card className="hover:bg-muted/50 hover:border-primary/50 transition-colors cursor-pointer">
-                <CardHeader>
+            <Card className="hover:bg-muted/50 hover:border-primary/50 transition-colors cursor-pointer rounded-xl shadow-sm">
+                <CardHeader className="p-4">
                     <CardTitle className="flex items-center gap-3">
                         <ListChecks className="h-6 w-6 text-primary" />
                         My Submissions
@@ -161,7 +162,7 @@ export default function Home() {
                         View your past odometer and other submissions.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-4 pt-0">
                     <Button variant="secondary" size="lg" className="w-full">
                         View History
                     </Button>
