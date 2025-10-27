@@ -1,17 +1,19 @@
 "use client";
 
 import { useState } from 'react';
-import { Camera, RefreshCw, Save } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import { CameraView } from './camera-view';
-import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../ui/card';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
-import { AlertCircle } from 'lucide-react';
 import { StatusChip } from './status-chip';
 import { Separator } from '../ui/separator';
+import { CameraCard } from './camera-card';
+import { Button } from '../ui/button';
+import { Save, RefreshCw, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function OdometerCapturePage() {
     const [captureState, setCaptureState] = useState<'capturing' | 'reviewing'>('capturing');
@@ -109,10 +111,12 @@ export default function OdometerCapturePage() {
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Retake
                     </Button>
-                    <Button>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save & Review
-                    </Button>
+                    <Link href="/review-submission" className="w-full">
+                        <Button className="w-full">
+                            <Save className="mr-2 h-4 w-4" />
+                            Save & Review
+                        </Button>
+                    </Link>
                 </CardFooter>
             </Card>
         </div>
