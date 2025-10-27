@@ -19,7 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 
 function OdometerPhotoCard({ onRetake, onUse }: { onRetake: () => void; onUse: () => void; }) {
     const [imageSeed, setImageSeed] = useState(1);
-    const imageUrl = `https://images.unsplash.com/photo-1612825175532-3a6953535249?w=800&h=450&fit=crop`;
+    const imageUrl = `https://images.unsplash.com/photo-1612825175532-3a6953535249?w=800&h=450&fit=crop&q=80`;
 
     const handleRetake = () => {
         setImageSeed(Math.floor(Math.random() * 1000));

@@ -86,7 +86,7 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
                     </CardHeader>
                     <CardContent>
                          <Image
-                            src={'https://images.unsplash.com/photo-1612825175532-3a6953535249?w=600&h=400&fit=crop'}
+                            src={'https://images.unsplash.com/photo-1612825175532-3a6953535249?w=600&h=400&fit=crop&q=80'}
                             alt="Odometer photo"
                             width={600}
                             height={400}
@@ -147,3 +147,4 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
 }
 
     
+
