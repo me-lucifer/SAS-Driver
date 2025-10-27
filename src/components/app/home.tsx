@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Camera, ListChecks, ShieldAlert } from 'lucide-react';
+import { Camera, ListChecks, ShieldAlert, Link as LinkIcon } from 'lucide-react';
 import { getAuth } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useFirebaseApp, useUser } from '@/firebase';
@@ -17,8 +17,9 @@ export default function Home() {
   const auth = getAuth(firebaseApp);
   const router = useRouter();
 
-  // Mock state for odometer submission
+  // Mock state for odometer submission and session vehicle
   const [odometerSubmitted, setOdometerSubmitted] = useState(false);
+  const [sessionVehicle, setSessionVehicle] = useState<{ plate: string } | null>({ plate: 'A 12345'});
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -44,7 +45,36 @@ export default function Home() {
         <ProfileDrawer user={user} onLogout={handleLogout} />
       </header>
 
+       {sessionVehicle && (
+        <div className="px-4 py-2 bg-muted border-b">
+          <Link href="/identify-vehicle">
+            <div className="flex justify-between items-center text-sm p-2 rounded-lg bg-background border shadow-sm cursor-pointer hover:bg-accent/50">
+                <span className="text-muted-foreground">Vehicle: <span className="font-semibold text-foreground">{sessionVehicle.plate}</span></span>
+                <span className="font-semibold text-primary">Change</span>
+            </div>
+          </Link>
+        </div>
+      )}
+
+
       <main className="flex-1 overflow-y-auto p-4 space-y-6">
+        {!sessionVehicle && (
+            <Card className="bg-yellow-50 border-yellow-200">
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                    <LinkIcon className="h-6 w-6 text-yellow-600" />
+                    <CardTitle className="text-yellow-900 text-lg">Link this session to a vehicle</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-start gap-4">
+                    <p className="text-yellow-800">
+                        You must identify your vehicle to submit an odometer reading.
+                    </p>
+                    <Link href="/identify-vehicle" passHref>
+                        <Button>Scan now</Button>
+                    </Link>
+                </CardContent>
+            </Card>
+        )}
+
         {!odometerSubmitted && (
             <Card className="bg-amber-50 border-amber-200">
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
@@ -71,7 +101,7 @@ export default function Home() {
                   </CardDescription>
               </CardHeader>
               <CardContent>
-                  <Button size="lg" className="w-full">
+                  <Button size="lg" className="w-full" disabled={!sessionVehicle}>
                       Start
                   </Button>
               </CardContent>
