@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetFooter,
+  SheetClose,
 } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { InfoRow } from './info-row';
-import { LogOut, Globe, Camera, HelpCircle, ShieldAlert } from 'lucide-react';
+import { LogOut, Globe, Camera, HelpCircle, ShieldAlert, X } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import {
   AlertDialog,
@@ -58,8 +59,13 @@ export function ProfileDrawer({ user, onLogout }: ProfileDrawerProps) {
                     </Avatar>
                 </SheetTrigger>
                 <SheetContent className="flex flex-col">
-                    <SheetHeader className="text-left">
+                    <SheetHeader className="text-left flex-row items-center justify-between">
                         <SheetTitle>Profile & Settings</SheetTitle>
+                        <SheetClose asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Close Profile and Settings">
+                                <X className='h-4 w-4' />
+                            </Button>
+                        </SheetClose>
                     </SheetHeader>
                     
                     <div className="flex-1 overflow-y-auto -mx-6 px-6 py-4 space-y-6">

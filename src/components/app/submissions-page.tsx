@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -129,22 +130,25 @@ localStorage.setItem('mockSubmissions', JSON.stringify(updatedSubmissions));
     return (
         <div className="flex flex-col h-full bg-background">
              <header className="flex items-center p-4 border-b h-16 shrink-0 gap-2">
-                 <Link href="/dashboard" passHref>
-                    <Button variant="ghost" size="icon">
-                        <ArrowLeft />
-                    </Button>
-                </Link>
+                <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard')} aria-label="Back to Dashboard">
+                    <ArrowLeft />
+                </Button>
                 <h1 className="text-xl font-bold flex-1">My Submissions</h1>
                  <Popover>
                     <PopoverTrigger asChild>
-                        <Button variant="outline" size="icon" className="relative">
+                        <Button variant="outline" size="icon" className="relative" aria-label="Open filters">
                             <ListFilter className="h-4 w-4"/>
                             {hasFilters && <span className="absolute -top-1 -right-1 block h-2 w-2 rounded-full bg-primary" />}
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-4" align="end">
                        <div className="space-y-4">
-                            <h4 className="font-medium leading-none">Filter Submissions</h4>
+                            <div className="flex justify-between items-center">
+                                <h4 className="font-medium leading-none">Filter Submissions</h4>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Close filters">
+                                    <X className='h-4 w-4' />
+                                </Button>
+                            </div>
                             
                             <div className="space-y-2">
                                 <Label>Search</Label>
@@ -155,6 +159,7 @@ localStorage.setItem('mockSubmissions', JSON.stringify(updatedSubmissions));
                                         className="pl-9 h-10"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
+                                        aria-label="Search by plate number"
                                     />
                                 </div>
                             </div>

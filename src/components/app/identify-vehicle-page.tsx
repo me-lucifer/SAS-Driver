@@ -153,10 +153,10 @@ export default function IdentifyVehiclePage() {
                         <TabsTrigger value="manual"><Edit className="mr-2 h-4 w-4" />Manual</TabsTrigger>
                     </TabsList>
                     <TabsContent value="scan-qr" className="mt-4 flex-1">
-                        <CameraView guide="qr" onScanSuccess={handleScanSuccess}/>
+                        <CameraView guide="qr" onScanSuccess={handleScanSuccess} />
                     </TabsContent>
                     <TabsContent value="plate-ocr" className="mt-4 flex-1">
-                        <CameraView guide="plate" onScanSuccess={handleScanSuccess}/>
+                        <CameraView guide="plate" onScanSuccess={handleScanSuccess} />
                          <Link href="#" className="text-sm text-center block mt-4 text-primary underline" onClick={handleManualLinkClick}>
                             OCR failed? Enter manually
                         </Link>
@@ -174,6 +174,7 @@ export default function IdentifyVehiclePage() {
                                     value={manualPlate}
                                     onChange={(e) => setManualPlate(e.target.value)}
                                     autoCapitalize="characters"
+                                    aria-label="Plate Number"
                                 />
                                 <Button className="w-full" size="lg" onClick={handleManualSubmit}>Submit</Button>
                             </CardContent>
