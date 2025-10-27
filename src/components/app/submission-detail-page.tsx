@@ -4,71 +4,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InfoRow } from './info-row';
 import { StatusChip } from './status-chip';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import Image from 'next/image';
 import { Badge } from '../ui/badge';
-import { ArrowLeft, Check, Clock, Edit, ShieldAlert, User, FileWarning } from 'lucide-react';
+import { ArrowLeft, Clock, User } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../ui/button';
-
-const mockSubmissionData = {
-    '1': {
-        id: '1',
-        dateTime: subDays(new Date(), 1),
-        vehicle: { plate: 'A 12345', type: 'Van' },
-        odometer: 25650,
-        delta: 218,
-        photoUrl: 'https://picsum.photos/seed/sub1/600/400',
-        location: 'Muscat, Oman',
-        notes: 'Vehicle is clean.',
-        ocr: { value: 25650, confidence: '99.1%' },
-        edits: null,
-        reviewerNotes: null,
-        status: 'Verified',
-        history: [
-            { status: 'Verified', user: 'Admin', time: format(subDays(new Date(), 1), 'yyyy-MM-dd') + 'T09:15:00', icon: Check },
-            { status: 'Submitted', user: 'Driver', time: format(subDays(new Date(), 1), 'yyyy-MM-dd') + 'T08:05:00', icon: Edit },
-        ]
-    },
-    '2': {
-        id: '2',
-        dateTime: subDays(new Date(), 2),
-        vehicle: { plate: 'A 12345', type: 'Van' },
-        odometer: 25432,
-        delta: 210,
-        photoUrl: 'https://picsum.photos/seed/sub2/600/400',
-        location: 'Barka, Oman',
-        notes: '',
-        ocr: { value: 25432, confidence: '98.5%' },
-        edits: null,
-        reviewerNotes: null,
-        status: 'Submitted',
-        history: [
-            { status: 'Submitted', user: 'Driver', time: format(subDays(new Date(), 2), 'yyyy-MM-dd') + 'T08:10:00', icon: Edit },
-        ]
-    },
-     '3': {
-        id: '3',
-        dateTime: subDays(new Date(), 3),
-        vehicle: { plate: 'B 67890', type: 'Truck' },
-        odometer: 55600,
-        delta: 100,
-        photoUrl: 'https://picsum.photos/seed/sub3/600/400',
-        location: 'Sohar, Oman',
-        notes: 'Scratched during delivery.',
-        ocr: { value: 5560, confidence: '85.2%' },
-        edits: { reason: "OCR missed last digit", correctedValue: 55600 },
-        reviewerNotes: "Low OCR confidence. Please verify reading on next check-in.",
-        status: 'Flagged',
-        history: [
-            { status: 'Flagged', user: 'Admin', time: format(subDays(new Date(), 3), 'yyyy-MM-dd') + 'T10:02:00', icon: FileWarning },
-            { status: 'Submitted', user: 'Driver', time: format(subDays(new Date(), 3), 'yyyy-MM-dd') + 'T07:58:00', icon: Edit },
-        ]
-    }
-};
+import { mockSubmissionDetails } from '@/lib/mock-data';
 
 export default function SubmissionDetailPage({ id }: { id: string }) {
-    const submissionData = mockSubmissionData[id as keyof typeof mockSubmissionData];
+    const submissionData = mockSubmissionDetails[id as keyof typeof mockSubmissionDetails];
     
     if (!submissionData) {
         return (
@@ -102,7 +47,7 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-1">
-                        <InfoRow label="Date & Time" value={format(submissionData.dateTime, "MMM d, yyyy 'at' h:mm a")} />
+                        <InfoRow label="Date & Time" value={format(new Date(submissionData.dateTime), "MMM d, yyyy 'at' h:mm a")} />
                         <InfoRow label="Vehicle" value={`${submissionData.vehicle.plate} (${submissionData.vehicle.type})`} />
                         <InfoRow label="Odometer" value={`${submissionData.odometer.toLocaleString()} km`} />
                         <InfoRow label="Delta" value={
@@ -154,7 +99,7 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        {submissionData.history.map((item, index) => {
+                        {submissionData.history.map((item: any, index: number) => {
                              const Icon = item.icon;
                              return (
                                 <div key={index} className="flex gap-4">

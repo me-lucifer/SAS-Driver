@@ -21,18 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format, subDays } from 'date-fns';
-
-const mockVehicles = {
-    'A 12345': { plate: 'A 12345', fleet: 'North Fleet', type: 'Van', driver: 'Ali Hassan', lastOdometer: 25432 },
-    'B 67890': { plate: 'B 67890', fleet: 'North', type: 'Truck', driver: null, lastOdometer: 55500 },
-    'C 24680': { plate: 'C 24680', fleet: 'South', type: 'Truck', driver: 'John Doe', lastOdometer: 88650 },
-};
-
-const mockSubmissions = [
-    { id: '1', date: format(subDays(new Date(), 1), 'yyyy-MM-dd'), vehicle: 'A 12345', odometer: 25650, delta: 218, status: 'Verified' },
-    { id: '2', date: format(subDays(new Date(), 2), 'yyyy-MM-dd'), vehicle: 'A 12345', odometer: 25432, delta: 210, status: 'Submitted' },
-    { id: '3', date: format(subDays(new Date(), 3), 'yyyy-MM-dd'), vehicle: 'B 67890', odometer: 55600, delta: 100, status: 'Flagged', reviewerNotes: 'Low OCR' },
-];
+import { mockVehicles, initialMockSubmissions } from '@/lib/mock-data';
 
 export default function IdentifyVehiclePage() {
     const [identifiedVehicle, setIdentifiedVehicle] = useState<any>(null);
@@ -43,7 +32,7 @@ export default function IdentifyVehiclePage() {
     const checkForExistingSubmission = (plate: string) => {
         const today = format(new Date(), 'yyyy-MM-dd');
         // This is a simplified check. A real app would also check mockSubmissions.
-        const submission = mockSubmissions.find(s => 
+        const submission = initialMockSubmissions.find(s => 
             s.vehicle === plate && 
             s.date === today && 
             (s.status === 'Submitted' || s.status === 'Verified')

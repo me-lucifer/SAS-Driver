@@ -11,37 +11,11 @@ import { FileText } from 'lucide-react';
 import { StatusChip } from './status-chip';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { useToast } from '@/hooks/use-toast';
-
-const initialMockSubmissions = [
-    {
-        id: '1',
-        date: format(subDays(new Date(), 1), 'yyyy-MM-dd'),
-        vehicle: 'A 12345',
-        odometer: 25650,
-        delta: 218,
-        status: 'Verified',
-    },
-    {
-        id: '2',
-        date: format(subDays(new Date(), 2), 'yyyy-MM-dd'),
-        vehicle: 'A 12345',
-        odometer: 25432,
-        delta: 210,
-        status: 'Submitted',
-    },
-    {
-        id: '3',
-        date: format(subDays(new Date(), 3), 'yyyy-MM-dd'),
-        vehicle: 'B 67890',
-        odometer: 55600,
-        delta: 100,
-        status: 'Flagged',
-    },
-];
+import { initialMockSubmissions } from '@/lib/mock-data';
 
 
 export default function SubmissionsPage() {
