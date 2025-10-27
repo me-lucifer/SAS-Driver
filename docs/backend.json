@@ -1,0 +1,221 @@
+{
+  "entities": {
+    "Driver": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Driver",
+      "type": "object",
+      "description": "Represents a driver in the SAS Fleet Driver App.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Driver entity."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The driver's phone number used for login.",
+          "format": "string"
+        },
+        "currentStatus": {
+          "type": "string",
+          "description": "The driver's current status (e.g., 'En Route', 'Delivered', 'Issue')."
+        }
+      },
+      "required": [
+        "id",
+        "phoneNumber"
+      ]
+    },
+    "DeliveryRoute": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DeliveryRoute",
+      "type": "object",
+      "description": "Represents a delivery route assigned to a driver.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DeliveryRoute entity."
+        },
+        "driverId": {
+          "type": "string",
+          "description": "Reference to Driver. (Relationship: Driver 1:N DeliveryRoute)"
+        },
+        "startLocation": {
+          "type": "string",
+          "description": "Starting location of the delivery route."
+        },
+        "endLocation": {
+          "type": "string",
+          "description": "Ending location of the delivery route."
+        },
+        "stops": {
+          "type": "array",
+          "description": "An ordered list of stops in the delivery route.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "driverId",
+        "startLocation",
+        "endLocation",
+        "stops"
+      ]
+    },
+    "DeliveryConfirmation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DeliveryConfirmation",
+      "type": "object",
+      "description": "Represents the confirmation of a successful delivery.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DeliveryConfirmation entity."
+        },
+        "deliveryRouteId": {
+          "type": "string",
+          "description": "Reference to DeliveryRoute. (Relationship: DeliveryRoute 1:1 DeliveryConfirmation)"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of the delivery confirmation.",
+          "format": "date-time"
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "URL of the photo uploaded as proof of delivery.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "deliveryRouteId",
+        "timestamp"
+      ]
+    },
+    "DispatchMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "DispatchMessage",
+      "type": "object",
+      "description": "Represents a message sent between a driver and dispatch.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the DispatchMessage entity."
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Reference to Driver. (Relationship: Driver 1:N DispatchMessage) or Dispatch. Id of the sender of the message."
+        },
+        "recipientId": {
+          "type": "string",
+          "description": "Reference to Driver. (Relationship: Driver 1:N DispatchMessage) or Dispatch. Id of the receiver of the message."
+        },
+        "message": {
+          "type": "string",
+          "description": "The content of the message."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the message was sent.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "senderId",
+        "recipientId",
+        "message",
+        "timestamp"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/drivers/{driverId}",
+        "definition": {
+          "entityName": "Driver",
+          "schema": {
+            "$ref": "#/backend/entities/Driver"
+          },
+          "description": "Stores driver profiles.  Allows drivers to manage their own information.",
+          "params": [
+            {
+              "name": "driverId",
+              "description": "The unique identifier of the driver."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/drivers/{driverId}/deliveryRoutes/{deliveryRouteId}",
+        "definition": {
+          "entityName": "DeliveryRoute",
+          "schema": {
+            "$ref": "#/backend/entities/DeliveryRoute"
+          },
+          "description": "Stores delivery routes assigned to drivers. Includes denormalized 'driverId' for authorization independence.",
+          "params": [
+            {
+              "name": "driverId",
+              "description": "The unique identifier of the driver."
+            },
+            {
+              "name": "deliveryRouteId",
+              "description": "The unique identifier of the delivery route."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/drivers/{driverId}/deliveryRoutes/{deliveryRouteId}/deliveryConfirmations/{deliveryConfirmationId}",
+        "definition": {
+          "entityName": "DeliveryConfirmation",
+          "schema": {
+            "$ref": "#/backend/entities/DeliveryConfirmation"
+          },
+          "description": "Stores delivery confirmations associated with specific routes and drivers.",
+          "params": [
+            {
+              "name": "driverId",
+              "description": "The unique identifier of the driver."
+            },
+            {
+              "name": "deliveryRouteId",
+              "description": "The unique identifier of the delivery route."
+            },
+            {
+              "name": "deliveryConfirmationId",
+              "description": "The unique identifier of the delivery confirmation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/dispatchMessages/{dispatchMessageId}",
+        "definition": {
+          "entityName": "DispatchMessage",
+          "schema": {
+            "$ref": "#/backend/entities/DispatchMessage"
+          },
+          "description": "Stores messages exchanged between drivers and dispatch.  Security rules will ensure drivers can only access messages where they are the sender or recipient.",
+          "params": [
+            {
+              "name": "dispatchMessageId",
+              "description": "The unique identifier of the dispatch message."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure is designed to support the SAS Fleet Driver App, focusing on secure data access and scalability. It leverages path-based ownership for driver-specific data and avoids hierarchical authorization dependencies for simpler security rules.\n\n*   **Drivers:** `/drivers/{driverId}` stores driver profiles.  Security rules will ensure that only the driver (or authorized admin functions, not detailed here) can read/write their profile data.  This path inherently supports secure `list` operations as no cross-driver data is mixed in this collection (QAP). Updates to `currentStatus` are straightforward.\n*   **Delivery Routes:** `/drivers/{driverId}/deliveryRoutes/{deliveryRouteId}`.  This nested structure establishes clear ownership. Only the driver and authorized admin functions can access these routes. The `driverId` is denormalized into each DeliveryRoute document, ensuring authorization independence (Strategy A) – security rules don't need to `get()` the driver document to check ownership. This also inherently supports secure `list` operations.\n*   **Delivery Confirmations:** `/drivers/{driverId}/deliveryRoutes/{deliveryRouteId}/deliveryConfirmations/{deliveryConfirmationId}`.  Following the nested ownership pattern, delivery confirmations are tied to a specific route and driver.  This structure, combined with the security rules, ensures that a driver can only create or modify confirmations for routes assigned to them. It provides QAPs by restricting list operations to confirmations associated with a specific delivery route and driver.\n*   **Dispatch Messages:** `/dispatchMessages/{dispatchMessageId}`. This is a top-level collection since messages can be between any driver and dispatch. While not directly owned by a driver, security is enforced based on `senderId` and `recipientId` fields. Security rules will ensure a driver can only read messages where they are the sender or recipient, and only dispatch can send/receive messages. The messages are not stored inside the user doc to avoid authorization issues with listing all messages.\n\nThis structure prioritizes Authorization Independence (Strategy A) by denormalizing ownership data and employs Structural Segregation (Strategy B) to maintain a homogeneous security posture within each collection. Access Modeling (Strategy C) is consistently applied using Path-Based ownership where applicable. These factors greatly enhance the application's security, scalability, and debuggability."
+  }
+}

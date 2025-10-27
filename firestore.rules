@@ -1,0 +1,133 @@
+/**
+ * @fileoverview Firestore Security Rules for the SAS Fleet Driver App.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for driver profiles and their associated data
+ * (delivery routes, confirmations). Dispatch messages are secured based on sender/recipient relationships.
+ *
+ * Data Structure:
+ * - /drivers/{driverId}: Stores driver profile information.
+ * - /drivers/{driverId}/deliveryRoutes/{deliveryRouteId}: Stores delivery routes for each driver.
+ * - /drivers/{driverId}/deliveryRoutes/{deliveryRouteId}/deliveryConfirmations/{deliveryConfirmationId}: Stores delivery confirmations for each route.
+ * - /dispatchMessages/{dispatchMessageId}: Stores messages between drivers and dispatch.
+ *
+ * Key Security Decisions:
+ * - Drivers can only manage their own profile data and delivery routes.
+ * - Delivery confirmations are tied to specific routes and drivers, restricting access accordingly.
+ * - Drivers can only access dispatch messages where they are either the sender or the recipient.
+ * - Data validation is limited to fields critical for authorization and relationship integrity.
+ *
+ * Denormalization for Authorization:
+ * - DeliveryRoute documents contain a denormalized `driverId` field to avoid needing to read the driver document for authorization.
+ *
+ * Structural Segregation:
+ * - Dispatch messages are stored in a top-level collection to simplify access control based on sender/recipient IDs.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Controls access to driver profile documents.
+     * @path /drivers/{driverId}
+     * @allow (create) Authenticated user can create their own driver profile if the driverId matches their UID.
+     * @allow (get, list, update, delete) Authenticated user can read, update, or delete their own driver profile if the driverId matches their UID.
+     * @deny (create) Authenticated user cannot create a driver profile for another user.
+     * @deny (update, delete) Authenticated user cannot update or delete another user's driver profile.
+     * @principle Enforces document ownership for driver profiles.
+     */
+    match /drivers/{driverId} {
+      function isOwner(driverId) {
+        return request.auth != null && request.auth.uid == driverId;
+      }
+
+      function isExistingOwner(driverId) {
+        return isOwner(driverId) && resource != null;
+      }
+
+      allow get: if isOwner(driverId);
+      allow list: if false;
+      allow create: if isOwner(driverId) && request.resource.data.id == driverId;
+      allow update: if isExistingOwner(driverId);
+      allow delete: if isExistingOwner(driverId);
+    }
+
+    /**
+     * @description Controls access to delivery routes for a specific driver.
+     * @path /drivers/{driverId}/deliveryRoutes/{deliveryRouteId}
+     * @allow (create) Authenticated user (driver) can create a delivery route under their profile if the driverId matches their UID.
+     * @allow (get, list, update, delete) Authenticated user (driver) can read, update, or delete a delivery route under their profile if the driverId matches their UID.
+     * @deny (create) Authenticated user cannot create a delivery route under another user's profile.
+     * @deny (update, delete) Authenticated user cannot update or delete a delivery route under another user's profile.
+     * @principle Enforces document ownership for delivery routes.
+     */
+    match /drivers/{driverId}/deliveryRoutes/{deliveryRouteId} {
+      function isOwner(driverId) {
+        return request.auth != null && request.auth.uid == driverId;
+      }
+
+      function isExistingOwner(driverId) {
+        return isOwner(driverId) && resource != null;
+      }
+
+      allow get: if isOwner(driverId);
+      allow list: if isOwner(driverId);
+      allow create: if isOwner(driverId);
+      allow update: if isExistingOwner(driverId);
+      allow delete: if isExistingOwner(driverId);
+    }
+
+    /**
+     * @description Controls access to delivery confirmations for a specific route and driver.
+     * @path /drivers/{driverId}/deliveryRoutes/{deliveryRouteId}/deliveryConfirmations/{deliveryConfirmationId}
+     * @allow (create) Authenticated user (driver) can create a delivery confirmation under their route if the driverId matches their UID.
+     * @allow (get, list, update, delete) Authenticated user (driver) can read, update, or delete a delivery confirmation under their route if the driverId matches their UID.
+     * @deny (create) Authenticated user cannot create a delivery confirmation under another user's route.
+     * @deny (update, delete) Authenticated user cannot update or delete a delivery confirmation under another user's route.
+     * @principle Enforces document ownership for delivery confirmations.
+     */
+    match /drivers/{driverId}/deliveryRoutes/{deliveryRouteId}/deliveryConfirmations/{deliveryConfirmationId} {
+      function isOwner(driverId) {
+        return request.auth != null && request.auth.uid == driverId;
+      }
+
+      function isExistingOwner(driverId) {
+        return isOwner(driverId) && resource != null;
+      }
+
+      allow get: if isOwner(driverId);
+      allow list: if isOwner(driverId);
+      allow create: if isOwner(driverId);
+      allow update: if isExistingOwner(driverId);
+      allow delete: if isExistingOwner(driverId);
+    }
+
+    /**
+     * @description Controls access to dispatch messages, ensuring drivers can only access messages where they are the sender or recipient.
+     * @path /dispatchMessages/{dispatchMessageId}
+     * @allow (get, list) Authenticated user can read messages where they are the sender or recipient.
+     * @allow (create) Authenticated user can create messages where they are the sender.
+     * @deny (create) Authenticated user cannot create messages where they are neither sender or recipient.
+     * @deny (update, delete) Authenticated user cannot update or delete any messages.
+     * @principle Enforces sender/recipient access control for dispatch messages.
+     */
+    match /dispatchMessages/{dispatchMessageId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isSenderOrRecipient() {
+        return isSignedIn() && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.recipientId);
+      }
+       function isSender() {
+        return isSignedIn() && (request.auth.uid == request.resource.data.senderId);
+      }
+
+      allow get: if isSenderOrRecipient();
+      allow list: if isSenderOrRecipient();
+      allow create: if isSender();
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
