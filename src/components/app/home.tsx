@@ -11,6 +11,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { ProfileDrawer } from './profile-drawer';
+import { format } from 'date-fns';
 
 type Vehicle = {
     plate: string;
@@ -36,6 +37,16 @@ export default function Home() {
     if (storedVehicle) {
       setSessionVehicle(JSON.parse(storedVehicle));
     }
+
+    // Check if submission for today exists
+    const submissions = JSON.parse(localStorage.getItem('mockSubmissions') || '[]');
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todaySubmission = submissions.find((sub: any) => sub.date === today && sub.vehicle === JSON.parse(storedVehicle || '{}').plate);
+
+    if (todaySubmission) {
+      setOdometerSubmitted(true);
+    }
+
   }, []);
 
   const handleLogout = async () => {

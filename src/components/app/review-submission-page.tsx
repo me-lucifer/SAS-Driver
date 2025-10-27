@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,16 +9,19 @@ import { InfoRow } from './info-row';
 import { StatusChip } from './status-chip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { CheckCircle2, Home, FileText, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Home, FileText, ArrowLeft, TriangleAlert } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useOnlineStatus } from '@/hooks/use-online-status';
+import { useToast } from '@/hooks/use-toast';
+import { Badge } from '../ui/badge';
 
 
 export default function ReviewSubmissionPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { toast } = useToast();
 
     const submissionData = {
         dateTime: new Date(),
@@ -30,6 +34,7 @@ export default function ReviewSubmissionPage() {
         photoUrl: `https://picsum.photos/seed/${Math.random()}/600/400`,
         location: searchParams.get('location') || 'Muscat, Oman',
         notes: searchParams.get('notes') || 'Tire pressure seems a bit low.',
+        flags: JSON.parse(searchParams.get('flags') || '[]'),
     };
 
     const [isConfirmed, setIsConfirmed] = useState(false);
@@ -39,23 +44,25 @@ export default function ReviewSubmissionPage() {
     const handleSubmit = () => {
         if (isConfirmed) {
             const newSubmission = {
-                ...submissionData,
-                id: `offline-${Date.now()}`,
+                id: isOnline ? `synced-${Date.now()}`: `offline-${Date.now()}`,
                 date: format(submissionData.dateTime, 'yyyy-MM-dd'),
                 vehicle: submissionData.vehicle.plate,
-                status: isOnline ? 'Submitted' : 'Offline',
+                odometer: submissionData.odometer,
+                delta: submissionData.delta,
+                status: submissionData.flags.length > 0 ? 'Flagged' : (isOnline ? 'Submitted' : 'Offline'),
             };
 
-            if (!isOnline) {
-                const offlineSubmissions = JSON.parse(localStorage.getItem('offlineSubmissions') || '[]');
-                offlineSubmissions.push(newSubmission);
-                localStorage.setItem('offlineSubmissions', JSON.stringify(offlineSubmissions));
-            } else {
-                 const mockSubmissions = JSON.parse(localStorage.getItem('mockSubmissions') || '[]');
-                 mockSubmissions.unshift(newSubmission);
-                 localStorage.setItem('mockSubmissions', JSON.stringify(mockSubmissions));
-            }
+            const storageKey = isOnline ? 'mockSubmissions' : 'offlineSubmissions';
+            const existingSubmissions = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            existingSubmissions.unshift(newSubmission);
+            localStorage.setItem(storageKey, JSON.stringify(existingSubmissions));
+
             setIsSubmitted(true);
+            
+            toast({
+                title: 'Success!',
+                description: 'Your odometer reading has been submitted.',
+            });
         }
     };
     
@@ -63,21 +70,23 @@ export default function ReviewSubmissionPage() {
         return (
             <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-background">
                 <CheckCircle2 className="w-24 h-24 text-success mb-6" />
-                <h1 className="text-2xl font-bold mb-2">Submission Successful</h1>
-                <p className="text-muted-foreground mb-8">
-                    {isOnline ? "Your odometer reading for today has been recorded." : "Your submission is saved and will sync when you're back online."}
+                <h1 className="text-2xl font-bold mb-2">Reading Submitted</h1>
+                 <p className="text-muted-foreground mb-8 max-w-xs">
+                    {submissionData.vehicle.plate} <br/>
+                    {submissionData.odometer.toLocaleString()} km <br/>
+                    {format(submissionData.dateTime, "MMM d, yyyy 'at' h:mm a")}
                 </p>
                 <div className="w-full space-y-3 max-w-sm">
-                     <Button size="lg" className="w-full" variant="outline" onClick={() => router.push('/submissions')}>
-                        <FileText className="mr-2 h-4 w-4" />
-                        View Submission
-                    </Button>
                     <Link href="/dashboard" className="w-full block">
                         <Button size="lg" className="w-full">
                             <Home className="mr-2 h-4 w-4" />
-                            Back to Home
+                            Back to Dashboard
                         </Button>
                     </Link>
+                     <Button size="lg" className="w-full" variant="outline" onClick={() => router.push('/submissions')}>
+                        <FileText className="mr-2 h-4 w-4" />
+                        View All Submissions
+                    </Button>
                 </div>
             </div>
         );
@@ -90,13 +99,28 @@ export default function ReviewSubmissionPage() {
     return (
         <div className="p-4 space-y-4">
              <header className="flex items-center mb-4 -mx-4 px-4 h-14 border-b">
-                 <Link href={backLink} passHref>
-                    <Button variant="ghost" size="icon">
-                        <ArrowLeft />
-                    </Button>
-                </Link>
+                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft />
+                </Button>
                 <h1 className="text-xl font-bold ml-2">Review & Submit</h1>
             </header>
+
+            {submissionData.flags.length > 0 && (
+                <Card className="bg-amber-50 border-amber-200">
+                    <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                         <TriangleAlert className="h-6 w-6 text-amber-600" />
+                         <CardTitle className="text-amber-900 text-lg">Flags Detected</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-amber-800 mb-2">This submission will be flagged for review due to:</p>
+                        <div className="flex flex-wrap gap-2">
+                            {submissionData.flags.map((flag: string) => (
+                                <Badge key={flag} variant="destructive">{flag}</Badge>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             <Card>
                 <CardHeader>

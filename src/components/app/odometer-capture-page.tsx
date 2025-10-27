@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -15,6 +16,7 @@ import { Button } from '../ui/button';
 import { RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useToast } from '@/hooks/use-toast';
 
 function OdometerPhotoCard({ onRetake, onUse }: { onRetake: () => void; onUse: () => void; }) {
     const [imageSeed, setImageSeed] = useState(1);
@@ -55,6 +57,7 @@ export default function OdometerCapturePage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const lastOdometerParam = searchParams.get('lastOdometer') || '0';
+    const { toast } = useToast();
 
     const [captureState, setCaptureState] = useState<'capturing' | 'reviewing'>('capturing');
     const [ocrResult, setOcrResult] = useState('25650');
@@ -65,6 +68,7 @@ export default function OdometerCapturePage() {
     const currentOdometer = parseInt(ocrResult, 10) || 0;
     const delta = currentOdometer - lastOdometer;
     const isWarning = delta > 300;
+    const ocrConfidence = 0.987;
 
     const handleCaptureSuccess = (scanResult: string) => {
         console.log("Capture successful:", scanResult);
@@ -74,16 +78,44 @@ export default function OdometerCapturePage() {
         setCaptureState('reviewing');
     };
 
-    const handleUsePhoto = () => {
-         const reviewLink = `/review-submission?${new URLSearchParams({
+    const handleValidationAndSubmit = () => {
+        // 1. Validation
+        if (!searchParams.get('plate')) {
+             toast({ variant: "destructive", title: "Validation Error", description: "No vehicle is linked to this session." });
+             return;
+        }
+        if (!ocrResult || isNaN(currentOdometer)) {
+             toast({ variant: "destructive", title: "Validation Error", description: "Odometer reading is not a valid number." });
+             return;
+        }
+        if (currentOdometer < 0 || currentOdometer > 1000000) {
+             toast({ variant: "destructive", title: "Validation Error", description: "Odometer reading is out of the reasonable range (0 - 1,000,000)." });
+             return;
+        }
+        if (currentOdometer < lastOdometer) {
+             toast({ variant: "destructive", title: "Validation Error", description: "Odometer reading cannot be less than the last verified reading." });
+             return;
+        }
+
+        // 2. Flagging
+        const flags = [];
+        if (isWarning) flags.push("Odo Δ high");
+        if (ocrConfidence < 0.6) flags.push("Low OCR");
+
+
+        const submissionParams = new URLSearchParams({
             odometer: currentOdometer.toString(),
             lastOdometer: lastOdometer.toString(),
             delta: delta.toString(),
             plate: searchParams.get('plate') || '',
             type: searchParams.get('type') || '',
             notes,
-        })}`;
-        router.push(reviewLink);
+            confidence: (ocrConfidence * 100).toFixed(1),
+            flags: JSON.stringify(flags),
+        });
+
+        // Redirect to the final review/submit page
+        router.push(`/review-submission?${submissionParams.toString()}`);
     }
     
     const handleOcrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,7 +164,7 @@ export default function OdometerCapturePage() {
             </header>
             
             <main className="flex-1 overflow-y-auto p-4 space-y-4">
-                <OdometerPhotoCard onRetake={() => {}} onUse={handleUsePhoto} />
+                <OdometerPhotoCard onRetake={() => {}} onUse={handleValidationAndSubmit} />
 
                 <Card>
                     <CardHeader>
@@ -143,7 +175,7 @@ export default function OdometerCapturePage() {
                             <Label htmlFor="ocr-result">OCR Result</Label>
                             <div className="flex items-center gap-2">
                                 <Input id="ocr-result" value={ocrResult} onChange={handleOcrChange} type="number" />
-                                <Badge variant="secondary">98.7%</Badge>
+                                <Badge variant="secondary">{(ocrConfidence * 100).toFixed(1)}%</Badge>
                             </div>
                         </div>
                         
@@ -187,8 +219,8 @@ export default function OdometerCapturePage() {
                 <Button variant="ghost" size="lg" onClick={() => router.back()}>
                     Cancel
                 </Button>
-                <Button size="lg" onClick={handleUsePhoto}>
-                    Submit Reading
+                <Button size="lg" onClick={handleValidationAndSubmit}>
+                    Save & Review
                 </Button>
             </footer>
         </div>
