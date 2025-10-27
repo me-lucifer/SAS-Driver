@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
@@ -38,14 +38,31 @@ export default function LoginPage() {
         });
         router.push('/dashboard');
     } catch (error: any) {
-        console.error("Error signing in: ", error);
-        toast({
-            variant: "destructive",
-            title: "Failed to log in",
-            description: error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password'
-                ? "Invalid email or password."
-                : "An unexpected error occurred. Please try again.",
-        });
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            // If user doesn't exist, create a new account
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                toast({
+                    title: "Account Created!",
+                    description: "A new account has been created and you are now logged in.",
+                });
+                router.push('/dashboard');
+            } catch (creationError: any) {
+                console.error("Error creating user: ", creationError);
+                toast({
+                    variant: "destructive",
+                    title: "Failed to create account",
+                    description: "Could not create a new user. Please try again.",
+                });
+            }
+        } else {
+            console.error("Error signing in: ", error);
+            toast({
+                variant: "destructive",
+                title: "Failed to log in",
+                description: "An unexpected error occurred. Please try again.",
+            });
+        }
     } finally {
         setIsLoading(false);
     }
