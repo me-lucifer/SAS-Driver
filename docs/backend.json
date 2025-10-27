@@ -133,8 +133,7 @@
   },
   "auth": {
     "providers": [
-      "password",
-      "anonymous"
+      "phone"
     ]
   },
   "firestore": {
