@@ -19,7 +19,7 @@ export default function Home() {
 
   // Mock state for odometer submission and session vehicle
   const [odometerSubmitted, setOdometerSubmitted] = useState(false);
-  const [sessionVehicle, setSessionVehicle] = useState<{ plate: string } | null>({ plate: 'A 12345'});
+  const [sessionVehicle, setSessionVehicle] = useState<{ plate: string } | null>(null);
 
   const handleLogout = async () => {
     await auth.signOut();
@@ -75,7 +75,7 @@ export default function Home() {
             </Card>
         )}
 
-        {!odometerSubmitted && (
+        {!odometerSubmitted && sessionVehicle && (
             <Card className="bg-amber-50 border-amber-200">
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
                     <ShieldAlert className="h-6 w-6 text-amber-500" />
@@ -89,7 +89,7 @@ export default function Home() {
             </Card>
         )}
 
-        <Link href="/identify-vehicle" passHref>
+        <Link href="/odometer-capture" passHref>
           <Card className="hover:bg-accent hover:border-primary transition-colors cursor-pointer">
               <CardHeader>
                   <CardTitle className="flex items-center gap-3">

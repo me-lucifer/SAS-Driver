@@ -22,12 +22,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { format, subDays } from 'date-fns';
 import { mockVehicles, initialMockSubmissions } from '@/lib/mock-data';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 export default function IdentifyVehiclePage() {
     const [identifiedVehicle, setIdentifiedVehicle] = useState<any>(null);
     const [manualPlate, setManualPlate] = useState('');
     const [existingSubmission, setExistingSubmission] = useState<any>(null);
     const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
+    const { toast } = useToast();
+    const router = useRouter();
+
 
     const checkForExistingSubmission = (plate: string) => {
         const today = format(new Date(), 'yyyy-MM-dd');
@@ -43,10 +48,18 @@ export default function IdentifyVehiclePage() {
     const handleVehicleIdentification = (plate: string) => {
         const vehicleData = mockVehicles[plate as keyof typeof mockVehicles];
         if (!vehicleData) {
-            // Handle case where vehicle is not found, maybe show a toast
-            console.log("Vehicle not found");
+            toast({
+                variant: "destructive",
+                title: "Vehicle Not Found",
+                description: `No vehicle with plate ${plate} found.`
+            });
             return;
         }
+
+        toast({
+            title: "Vehicle Identified",
+            description: `Vehicle ${vehicleData.plate} linked to this session.`
+        });
 
         const existing = checkForExistingSubmission(vehicleData.plate);
         if (existing) {
@@ -103,7 +116,7 @@ export default function IdentifyVehiclePage() {
                 </TabsContent>
                 <TabsContent value="plate-ocr" className="mt-4">
                     <CameraView guide="plate" onScanSuccess={handleScanSuccess}/>
-                     <Link href="#" className="text-sm text-center block mt-4 text-primary underline">
+                     <Link href="#" className="text-sm text-center block mt-4 text-primary underline" onClick={() => (document.querySelector('[data-radix-collection-item][value="manual"]') as HTMLElement)?.click()}>
                         OCR failed? Enter manually
                     </Link>
                 </TabsContent>
