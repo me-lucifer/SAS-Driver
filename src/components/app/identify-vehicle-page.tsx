@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { mockVehicles, initialMockSubmissions } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -66,31 +66,50 @@ export default function IdentifyVehiclePage() {
             setExistingSubmission(existing);
             setShowDuplicateDialog(true);
         } else {
+            // Set session vehicle in local storage
+            localStorage.setItem('sessionVehicle', JSON.stringify(vehicleData));
             setIdentifiedVehicle(vehicleData);
         }
     };
 
     const handleManualSubmit = () => {
         if (manualPlate) {
-            handleVehicleIdentification(manualPlate);
+            handleVehicleIdentification(manualPlate.toUpperCase());
         }
     };
     
     const handleScanSuccess = (scanResult: string) => {
         console.log("Scan successful:", scanResult);
         // Simulate scanning one of the seeded vehicles
-        handleVehicleIdentification('A 12345');
+        const plates = Object.keys(mockVehicles);
+        const randomPlate = plates[Math.floor(Math.random() * plates.length)];
+        handleVehicleIdentification(randomPlate);
     }
 
     const proceedWithNewSubmission = () => {
         setShowDuplicateDialog(false);
-        setIdentifiedVehicle(mockVehicles[existingSubmission.vehicle as keyof typeof mockVehicles]);
+        const vehicleData = mockVehicles[existingSubmission.vehicle as keyof typeof mockVehicles]
+        localStorage.setItem('sessionVehicle', JSON.stringify(vehicleData));
+        setIdentifiedVehicle(vehicleData);
+    }
+    
+    const handleChangeVehicle = () => {
+        localStorage.removeItem('sessionVehicle');
+        setIdentifiedVehicle(null);
     }
 
     if (identifiedVehicle) {
         return (
-            <div className="p-4">
-                <VehicleCard vehicle={identifiedVehicle} />
+            <div className="p-4 space-y-4">
+                <header className="flex items-center mb-4 -mx-4 px-4 h-14 border-b">
+                    <Link href="/dashboard" passHref>
+                        <Button variant="ghost" size="icon">
+                            <ArrowLeft />
+                        </Button>
+                    </Link>
+                    <h1 className="text-xl font-bold ml-2">Vehicle Identified</h1>
+                </header>
+                <VehicleCard vehicle={identifiedVehicle} onChangeVehicle={handleChangeVehicle} />
             </div>
         );
     }
@@ -105,22 +124,22 @@ export default function IdentifyVehiclePage() {
                 </Link>
                 <h1 className="text-xl font-bold ml-2">Identify Vehicle</h1>
             </header>
-            <Tabs defaultValue="scan-qr">
+            <Tabs defaultValue="scan-qr" className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="scan-qr"><QrCode className="mr-2 h-4 w-4" />Scan QR</TabsTrigger>
                     <TabsTrigger value="plate-ocr"><Camera className="mr-2 h-4 w-4" />Plate OCR</TabsTrigger>
                     <TabsTrigger value="manual"><Edit className="mr-2 h-4 w-4" />Manual</TabsTrigger>
                 </TabsList>
-                <TabsContent value="scan-qr" className="mt-4">
+                <TabsContent value="scan-qr" className="mt-4 flex-1">
                     <CameraView guide="qr" onScanSuccess={handleScanSuccess}/>
                 </TabsContent>
-                <TabsContent value="plate-ocr" className="mt-4">
+                <TabsContent value="plate-ocr" className="mt-4 flex-1">
                     <CameraView guide="plate" onScanSuccess={handleScanSuccess}/>
                      <Link href="#" className="text-sm text-center block mt-4 text-primary underline" onClick={() => (document.querySelector('[data-radix-collection-item][value="manual"]') as HTMLElement)?.click()}>
                         OCR failed? Enter manually
                     </Link>
                 </TabsContent>
-                <TabsContent value="manual" className="mt-4">
+                <TabsContent value="manual" className="mt-4 flex-1">
                     <Card>
                         <CardHeader>
                             <CardTitle>Enter Plate Number</CardTitle>
@@ -130,21 +149,21 @@ export default function IdentifyVehiclePage() {
                             <Input 
                                 placeholder="e.g., A 12345" 
                                 value={manualPlate}
-                                onChange={(e) => setManualPlate(e.target.value.toUpperCase())}
+                                onChange={(e) => setManualPlate(e.target.value)}
+                                autoCapitalize="characters"
                             />
-                            <Button className="w-full" onClick={handleManualSubmit}>Submit</Button>
+                            <Button className="w-full" size="lg" onClick={handleManualSubmit}>Submit</Button>
                         </CardContent>
                     </Card>
                 </TabsContent>
             </Tabs>
             
-            {/* Duplicate Submission Dialog */}
             <AlertDialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Duplicate Submission Warning</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Today’s reading for this vehicle already exists (Δ +{existingSubmission?.delta} km). 
+                            Today’s reading for vehicle <span className="font-bold">{existingSubmission?.vehicle}</span> already exists (Δ +{existingSubmission?.delta} km). 
                             Are you sure you want to create a new submission?
                         </AlertDialogDescription>
                     </AlertDialogHeader>

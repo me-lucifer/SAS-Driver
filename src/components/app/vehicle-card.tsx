@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoRow } from "./info-row";
 import { Button } from "../ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Undo2 } from "lucide-react";
 import Link from "next/link";
 
 type Vehicle = {
@@ -13,7 +13,7 @@ type Vehicle = {
     lastOdometer: number;
 }
 
-export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+export function VehicleCard({ vehicle, onChangeVehicle }: { vehicle: Vehicle, onChangeVehicle: () => void }) {
     
     const odometerLink = `/odometer-capture?${new URLSearchParams({
         lastOdometer: vehicle.lastOdometer.toString(),
@@ -24,7 +24,7 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Vehicle Identified</CardTitle>
+                <CardTitle>Vehicle Details</CardTitle>
                 <CardDescription>The following vehicle details were found.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -33,13 +33,17 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
                 <InfoRow label="Vehicle Type" value={vehicle.type} />
                 <InfoRow label="Assigned Driver" value={vehicle.driver || 'None'} />
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex-col items-stretch space-y-2">
                 <Link href={odometerLink} className="w-full">
                     <Button className="w-full" size="lg">
                         Next: Odometer
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        <ArrowRight className="ml-auto" />
                     </Button>
                 </Link>
+                <Button variant="link" className="text-muted-foreground" onClick={onChangeVehicle}>
+                    <Undo2 className="mr-2"/>
+                    Change vehicle
+                </Button>
             </CardFooter>
         </Card>
     )
