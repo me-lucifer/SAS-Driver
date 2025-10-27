@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { InfoRow } from "./info-row";
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 type Vehicle = {
     plate: string;
@@ -24,10 +25,12 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
                 <InfoRow label="Assigned Driver" value={vehicle.driver || 'None'} />
             </CardContent>
             <CardFooter>
-                <Button className="w-full" size="lg">
-                    Next: Odometer
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <Link href="/odometer-capture" className="w-full">
+                    <Button className="w-full" size="lg">
+                        Next: Odometer
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                </Link>
             </CardFooter>
         </Card>
     )
