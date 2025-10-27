@@ -11,6 +11,8 @@ import { CheckCircle2, Home, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useOnlineStatus } from '@/hooks/use-online-status';
+import { useRouter } from 'next/navigation';
 
 const submissionData = {
     dateTime: new Date(),
@@ -28,11 +30,28 @@ const submissionData = {
 export default function ReviewSubmissionPage() {
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const isOnline = useOnlineStatus();
+    const router = useRouter();
+
 
     const handleSubmit = () => {
         if (isConfirmed) {
-            // In a real app, you would send the data to a server here.
-            console.log('Submitting data:', submissionData);
+            if (!isOnline) {
+                // Save to local storage if offline
+                const offlineSubmissions = JSON.parse(localStorage.getItem('offlineSubmissions') || '[]');
+                const newSubmission = {
+                    ...submissionData,
+                    id: `offline-${Date.now()}`,
+                    date: format(submissionData.dateTime, 'yyyy-MM-dd'),
+                    vehicle: submissionData.vehicle.plate,
+                    status: 'Offline',
+                };
+                offlineSubmissions.push(newSubmission);
+                localStorage.setItem('offlineSubmissions', JSON.stringify(offlineSubmissions));
+            } else {
+                // In a real app, you would send the data to a server here.
+                console.log('Submitting data:', submissionData);
+            }
             setIsSubmitted(true);
         }
     };
@@ -43,10 +62,10 @@ export default function ReviewSubmissionPage() {
                 <CheckCircle2 className="w-24 h-24 text-success mb-6" />
                 <h1 className="text-2xl font-bold mb-2">Submission Successful</h1>
                 <p className="text-muted-foreground mb-8">
-                    Your odometer reading for today has been recorded.
+                    {isOnline ? "Your odometer reading for today has been recorded." : "Your submission is saved and will sync when you're back online."}
                 </p>
                 <div className="w-full space-y-3 max-w-sm">
-                     <Button size="lg" className="w-full" variant="outline">
+                     <Button size="lg" className="w-full" variant="outline" onClick={() => router.push('/submissions')}>
                         <FileText className="mr-2" />
                         View Submission
                     </Button>
@@ -110,7 +129,7 @@ export default function ReviewSubmissionPage() {
                     </Label>
                 </div>
                 <Button size="lg" className="w-full" disabled={!isConfirmed} onClick={handleSubmit}>
-                    Submit Reading
+                   {isOnline ? 'Submit Reading' : 'Save for Offline'}
                 </Button>
             </div>
         </div>

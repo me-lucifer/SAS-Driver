@@ -1,11 +1,10 @@
-
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar as CalendarIcon, ListFilter, Search } from 'lucide-react';
+import { Calendar as CalendarIcon, ListFilter, Search, RefreshCw } from 'lucide-react';
 import { EmptyState } from './empty-state';
 import { FileText } from 'lucide-react';
 import { StatusChip } from './status-chip';
@@ -13,6 +12,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
+import { useOnlineStatus } from '@/hooks/use-online-status';
+import { useToast } from '@/hooks/use-toast';
 
 const mockSubmissions = [
     {
@@ -46,16 +47,77 @@ export default function SubmissionsPage() {
     const [search, setSearch] = useState('');
     const [date, setDate] = useState<Date | undefined>(undefined);
     const router = useRouter();
+    const isOnline = useOnlineStatus();
+    const { toast } = useToast();
 
+    const [offlineSubmissions, setOfflineSubmissions] = useState<any[]>([]);
 
-    const filteredSubmissions = submissions.filter(submission => {
+    useEffect(() => {
+        // Load offline submissions from local storage
+        const storedOffline = JSON.parse(localStorage.getItem('offlineSubmissions') || '[]');
+        setOfflineSubmissions(storedOffline);
+    }, []);
+
+    const allSubmissions = [...offlineSubmissions, ...submissions];
+
+    const filteredSubmissions = allSubmissions.filter(submission => {
         const matchesSearch = submission.vehicle.toLowerCase().includes(search.toLowerCase());
         const matchesDate = !date || submission.date === format(date, 'yyyy-MM-dd');
         return matchesSearch && matchesDate;
-    });
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
 
     const handleRowClick = (id: string) => {
+        // Prevent clicking on offline submissions for now
+        if (id.startsWith('offline-')) {
+            toast({
+                title: 'Submission Not Synced',
+                description: 'This submission is saved locally and will be available once you are online.',
+                variant: 'default',
+            });
+            return;
+        }
         router.push(`/submissions/${id}`);
+    }
+
+    const handleSync = () => {
+        if (!isOnline) {
+            toast({
+                variant: "destructive",
+                title: "Sync Failed",
+                description: "You must be online to sync submissions.",
+            });
+            return;
+        }
+        
+        // Simulate syncing
+        toast({
+            title: "Syncing...",
+            description: `${offlineSubmissions.length} submissions are being synced.`
+        });
+        
+        setTimeout(() => {
+            // In a real app, this is where you would upload to Firestore
+            // and then clear local storage.
+            const syncedSubmissions = offlineSubmissions.map(sub => ({
+                ...sub,
+                id: sub.id.replace('offline-', 'synced-'), // Give it a new ID
+                status: 'Submitted' // Change status after sync
+            }));
+
+            // Add synced submissions to the main list
+            setSubmissions(prev => [...syncedSubmissions, ...prev]);
+
+            // Clear offline data
+            localStorage.removeItem('offlineSubmissions');
+            setOfflineSubmissions([]);
+
+            toast({
+                title: "Sync Complete!",
+                description: "All offline submissions have been synced.",
+            });
+
+        }, 2000);
     }
 
     return (
@@ -112,6 +174,14 @@ export default function SubmissionsPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
+                    {offlineSubmissions.length > 0 && (
+                        <div className="mb-4">
+                             <Button onClick={handleSync} disabled={!isOnline} className="w-full">
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                                Sync {offlineSubmissions.length} Offline Submission{offlineSubmissions.length > 1 ? 's' : ''}
+                            </Button>
+                        </div>
+                    )}
                     {filteredSubmissions.length > 0 ? (
                         <div className="space-y-3">
                             {filteredSubmissions.map((sub) => (

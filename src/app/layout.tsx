@@ -3,6 +3,8 @@ import './globals.css';
 import { PhoneFrame } from '@/components/phone-frame';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { OfflineProvider } from '@/hooks/use-online-status';
+import { OfflineBanner } from '@/components/app/offline-banner';
 
 export const metadata: Metadata = {
   title: 'SAS Driver',
@@ -22,12 +24,15 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased bg-gray-200 dark:bg-slate-900 flex items-center justify-center min-h-screen p-4">
-        <FirebaseClientProvider>
-          <PhoneFrame>
-            {children}
-          </PhoneFrame>
-          <Toaster />
-        </FirebaseClientProvider>
+        <OfflineProvider>
+          <FirebaseClientProvider>
+            <PhoneFrame>
+              <OfflineBanner />
+              {children}
+            </PhoneFrame>
+            <Toaster />
+          </FirebaseClientProvider>
+        </OfflineProvider>
       </body>
     </html>
   );
