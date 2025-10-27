@@ -2,21 +2,15 @@
 "use client";
 
 import { useState } from 'react';
-import { Camera, ListChecks, LogOut, ShieldAlert } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Camera, ListChecks, ShieldAlert } from 'lucide-react';
 import { getAuth } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useFirebaseApp, useUser } from '@/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
+import { ProfileDrawer } from './profile-drawer';
 
 export default function Home() {
   const firebaseApp = useFirebaseApp();
@@ -48,20 +42,7 @@ export default function Home() {
             </Link>
             <Badge variant="outline">Driver</Badge>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-              <Avatar className="cursor-pointer">
-                  <AvatarImage src="https://picsum.photos/seed/driver/40/40" alt="Driver" data-ai-hint="person portrait" />
-                  <AvatarFallback>{user?.email?.substring(0, 2).toUpperCase() || 'DR'}</AvatarFallback>
-              </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-              </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ProfileDrawer user={user} onLogout={handleLogout} />
       </header>
 
       <main className="flex-1 overflow-y-auto p-4 space-y-4">
