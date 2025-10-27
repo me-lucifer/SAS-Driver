@@ -52,7 +52,7 @@ export default function Home() {
           <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer">
                   <AvatarImage src="https://picsum.photos/seed/driver/40/40" alt="Driver" data-ai-hint="person portrait" />
-                  <AvatarFallback>{user?.phoneNumber?.slice(-2) || 'DR'}</AvatarFallback>
+                  <AvatarFallback>{user?.email?.substring(0, 2).toUpperCase() || 'DR'}</AvatarFallback>
               </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

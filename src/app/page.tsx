@@ -3,7 +3,6 @@
 import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import Home from '@/components/app/home';
 import { Loader2 } from 'lucide-react';
 
 export default function HomePage() {
@@ -11,21 +10,21 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/welcome');
+    if (!isUserLoading) {
+      if (user) {
+        router.push('/dashboard');
+      } else {
+        router.push('/welcome');
+      }
     }
   }, [isUserLoading, user, router]);
 
-  if (isUserLoading || !user) {
-    return (
-        <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="mt-2">Loading...</p>
-            </div>
-        </div>
-    );
-  }
-
-  return <Home />;
+  return (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-2">Loading...</p>
+      </div>
+    </div>
+  );
 }
