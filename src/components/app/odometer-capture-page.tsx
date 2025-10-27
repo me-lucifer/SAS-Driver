@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Camera } from 'lucide-react';
 import { CameraView } from './camera-view';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../ui/card';
@@ -12,23 +14,27 @@ import { StatusChip } from './status-chip';
 import { Separator } from '../ui/separator';
 import { CameraCard } from './camera-card';
 import { Button } from '../ui/button';
-import { Save, RefreshCw, ArrowRight } from 'lucide-react';
+import { Save, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function OdometerCapturePage() {
+    const searchParams = useSearchParams();
+    const lastOdometerParam = searchParams.get('lastOdometer') || '0';
+
     const [captureState, setCaptureState] = useState<'capturing' | 'reviewing'>('capturing');
-    const [ocrResult, setOcrResult] = useState('123456');
+    const [ocrResult, setOcrResult] = useState('25650');
     const [isEdited, setIsEdited] = useState(false);
 
-    const lastOdometer = 123180;
+    const lastOdometer = parseInt(lastOdometerParam, 10);
     const currentOdometer = parseInt(ocrResult, 10) || 0;
     const delta = currentOdometer - lastOdometer;
     const isWarning = delta < 0 || delta > 300;
 
     const handleCapture = (scanResult: string) => {
-        // In a real app, you'd get the OCR result here
         console.log("Capture successful:", scanResult);
-        setOcrResult('123456'); // Mock result
+        // Simulate OCR result based on the last odometer to show a realistic delta
+        const simulatedOdometer = lastOdometer + Math.floor(Math.random() * 250) + 50;
+        setOcrResult(simulatedOdometer.toString());
         setCaptureState('reviewing');
     };
 
@@ -50,13 +56,21 @@ export default function OdometerCapturePage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {/* We use the plate guide for a rectangular shape suitable for odometers */}
                         <CameraView guide="plate" onScanSuccess={handleCapture} />
                     </CardContent>
                 </Card>
             </div>
         );
     }
+
+    // Build the query string for the next page
+    const reviewLink = `/review-submission?${new URLSearchParams({
+        odometer: currentOdometer.toString(),
+        lastOdometer: lastOdometer.toString(),
+        delta: delta.toString(),
+        plate: searchParams.get('plate') || '',
+        type: searchParams.get('type') || '',
+    })}`;
 
     return (
         <div className="p-4 space-y-4">
@@ -72,7 +86,7 @@ export default function OdometerCapturePage() {
                     <div className="space-y-2">
                         <Label htmlFor="ocr-result">OCR Result</Label>
                         <div className="flex items-center gap-2">
-                            <Input id="ocr-result" value={ocrResult} onChange={handleOcrChange} />
+                            <Input id="ocr-result" value={ocrResult} onChange={handleOcrChange} type="number" />
                             <Badge variant="secondary">98.7%</Badge>
                         </div>
                     </div>
@@ -100,6 +114,11 @@ export default function OdometerCapturePage() {
                         </div>
                     </div>
 
+                     <div className="space-y-2">
+                        <Label htmlFor="location">GPS Location (auto-tagged)</Label>
+                        <Input id="location" value="Muscat, Oman" disabled />
+                    </div>
+
                     <div className="space-y-2">
                         <Label htmlFor="notes">Notes (Optional)</Label>
                         <Textarea id="notes" placeholder="Add any relevant notes..." maxLength={140} />
@@ -111,7 +130,7 @@ export default function OdometerCapturePage() {
                         <RefreshCw className="mr-2 h-4 w-4" />
                         Retake
                     </Button>
-                    <Link href="/review-submission" className="w-full">
+                    <Link href={reviewLink} className="w-full">
                         <Button className="w-full">
                             <Save className="mr-2 h-4 w-4" />
                             Save & Review

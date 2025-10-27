@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -10,52 +11,61 @@ import { FileText } from 'lucide-react';
 import { StatusChip } from './status-chip';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { useToast } from '@/hooks/use-toast';
 
-const mockSubmissions = [
+const initialMockSubmissions = [
     {
         id: '1',
-        date: '2024-07-28',
+        date: format(subDays(new Date(), 1), 'yyyy-MM-dd'),
         vehicle: 'A 12345',
-        odometer: 123456,
-        delta: 276,
+        odometer: 25650,
+        delta: 218,
         status: 'Verified',
     },
     {
         id: '2',
-        date: '2024-07-27',
+        date: format(subDays(new Date(), 2), 'yyyy-MM-dd'),
         vehicle: 'A 12345',
-        odometer: 123180,
-        delta: 251,
-        status: 'Verified',
+        odometer: 25432,
+        delta: 210,
+        status: 'Submitted',
     },
     {
         id: '3',
-        date: '2024-07-26',
+        date: format(subDays(new Date(), 3), 'yyyy-MM-dd'),
         vehicle: 'B 67890',
-        odometer: 89543,
-        delta: -10,
+        odometer: 55600,
+        delta: 100,
         status: 'Flagged',
     },
 ];
 
+
 export default function SubmissionsPage() {
-    const [submissions, setSubmissions] = useState(mockSubmissions);
+    const [submissions, setSubmissions] = useState<any[]>([]);
     const [search, setSearch] = useState('');
     const [date, setDate] = useState<Date | undefined>(undefined);
     const router = useRouter();
     const isOnline = useOnlineStatus();
     const { toast } = useToast();
-
     const [offlineSubmissions, setOfflineSubmissions] = useState<any[]>([]);
 
     useEffect(() => {
-        // Load offline submissions from local storage
+        // Initialize mock submissions in local storage if not present
+        if (!localStorage.getItem('mockSubmissions')) {
+            localStorage.setItem('mockSubmissions', JSON.stringify(initialMockSubmissions));
+        }
+        
+        // Load submissions from local storage
+        const storedSubmissions = JSON.parse(localStorage.getItem('mockSubmissions') || '[]');
         const storedOffline = JSON.parse(localStorage.getItem('offlineSubmissions') || '[]');
+        
+        setSubmissions(storedSubmissions);
         setOfflineSubmissions(storedOffline);
+
     }, []);
 
     const allSubmissions = [...offlineSubmissions, ...submissions];
@@ -68,7 +78,6 @@ export default function SubmissionsPage() {
 
 
     const handleRowClick = (id: string) => {
-        // Prevent clicking on offline submissions for now
         if (id.startsWith('offline-')) {
             toast({
                 title: 'Submission Not Synced',
@@ -90,25 +99,22 @@ export default function SubmissionsPage() {
             return;
         }
         
-        // Simulate syncing
         toast({
             title: "Syncing...",
             description: `${offlineSubmissions.length} submissions are being synced.`
         });
         
         setTimeout(() => {
-            // In a real app, this is where you would upload to Firestore
-            // and then clear local storage.
             const syncedSubmissions = offlineSubmissions.map(sub => ({
                 ...sub,
-                id: sub.id.replace('offline-', 'synced-'), // Give it a new ID
-                status: 'Submitted' // Change status after sync
+                id: sub.id.replace('offline-', `synced-${Math.random()}`),
+                status: 'Submitted'
             }));
 
-            // Add synced submissions to the main list
-            setSubmissions(prev => [...syncedSubmissions, ...prev]);
+            const updatedSubmissions = [...syncedSubmissions, ...submissions];
+            setSubmissions(updatedSubmissions);
+            localStorage.setItem('mockSubmissions', JSON.stringify(updatedSubmissions));
 
-            // Clear offline data
             localStorage.removeItem('offlineSubmissions');
             setOfflineSubmissions([]);
 
@@ -177,7 +183,7 @@ export default function SubmissionsPage() {
                     {offlineSubmissions.length > 0 && (
                         <div className="mb-4">
                              <Button onClick={handleSync} disabled={!isOnline} className="w-full">
-                                <RefreshCw className="mr-2 h-4 w-4" />
+                                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                                 Sync {offlineSubmissions.length} Offline Submission{offlineSubmissions.length > 1 ? 's' : ''}
                             </Button>
                         </div>
@@ -196,7 +202,7 @@ export default function SubmissionsPage() {
                                         <div className="flex flex-col items-end space-y-1">
                                             <StatusChip status={sub.status as any} />
                                             <p className="text-xs font-mono text-muted-foreground">
-                                                Δ {sub.delta} km
+                                                Δ {sub.delta.toLocaleString()} km
                                             </p>
                                         </div>
                                     </CardContent>
@@ -206,8 +212,8 @@ export default function SubmissionsPage() {
                     ) : (
                         <EmptyState 
                             icon={FileText}
-                            title="No submissions yet"
-                            description="Capture your first odometer reading to see it here."
+                            title="No submissions found"
+                            description="Your vehicle logs will appear here once you submit them."
                         />
                     )}
                 </CardContent>

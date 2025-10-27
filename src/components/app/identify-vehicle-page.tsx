@@ -20,23 +20,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 
-// Mock submissions data, which would typically come from a database.
+const mockVehicles = {
+    'A 12345': { plate: 'A 12345', fleet: 'North Fleet', type: 'Van', driver: 'Ali Hassan', lastOdometer: 25432 },
+    'B 67890': { plate: 'B 67890', fleet: 'North', type: 'Truck', driver: null, lastOdometer: 55500 },
+    'C 24680': { plate: 'C 24680', fleet: 'South', type: 'Truck', driver: 'John Doe', lastOdometer: 88650 },
+};
+
 const mockSubmissions = [
-    { id: '1', date: '2024-07-28', vehicle: 'A 12345', odometer: 123456, delta: 276, status: 'Verified' },
-    { id: '2', date: '2024-07-27', vehicle: 'A 12345', odometer: 123180, delta: 251, status: 'Verified' },
-    { id: '3', date: '2024-07-26', vehicle: 'B 67890', odometer: 89543, delta: -10, status: 'Flagged' },
+    { id: '1', date: format(subDays(new Date(), 1), 'yyyy-MM-dd'), vehicle: 'A 12345', odometer: 25650, delta: 218, status: 'Verified' },
+    { id: '2', date: format(subDays(new Date(), 2), 'yyyy-MM-dd'), vehicle: 'A 12345', odometer: 25432, delta: 210, status: 'Submitted' },
+    { id: '3', date: format(subDays(new Date(), 3), 'yyyy-MM-dd'), vehicle: 'B 67890', odometer: 55600, delta: 100, status: 'Flagged', reviewerNotes: 'Low OCR' },
 ];
 
 export default function IdentifyVehiclePage() {
-    const [identifiedVehicle, setIdentifiedVehicle] = useState(null);
+    const [identifiedVehicle, setIdentifiedVehicle] = useState<any>(null);
     const [manualPlate, setManualPlate] = useState('');
     const [existingSubmission, setExistingSubmission] = useState<any>(null);
     const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
 
     const checkForExistingSubmission = (plate: string) => {
         const today = format(new Date(), 'yyyy-MM-dd');
+        // This is a simplified check. A real app would also check mockSubmissions.
         const submission = mockSubmissions.find(s => 
             s.vehicle === plate && 
             s.date === today && 
@@ -45,7 +51,14 @@ export default function IdentifyVehiclePage() {
         return submission;
     };
 
-    const handleVehicleIdentification = (vehicleData: any) => {
+    const handleVehicleIdentification = (plate: string) => {
+        const vehicleData = mockVehicles[plate as keyof typeof mockVehicles];
+        if (!vehicleData) {
+            // Handle case where vehicle is not found, maybe show a toast
+            console.log("Vehicle not found");
+            return;
+        }
+
         const existing = checkForExistingSubmission(vehicleData.plate);
         if (existing) {
             setExistingSubmission(existing);
@@ -57,33 +70,19 @@ export default function IdentifyVehiclePage() {
 
     const handleManualSubmit = () => {
         if (manualPlate) {
-            handleVehicleIdentification({
-                plate: manualPlate,
-                fleet: 'North Region',
-                type: '2-Ton Pickup',
-                driver: 'Ali Hassan',
-            });
+            handleVehicleIdentification(manualPlate);
         }
     };
     
     const handleScanSuccess = (scanResult: string) => {
         console.log("Scan successful:", scanResult);
-        handleVehicleIdentification({
-            plate: 'A 12345',
-            fleet: 'North Region',
-            type: '2-Ton Pickup',
-            driver: 'Ali Hassan',
-        });
+        // Simulate scanning one of the seeded vehicles
+        handleVehicleIdentification('A 12345');
     }
 
     const proceedWithNewSubmission = () => {
         setShowDuplicateDialog(false);
-        setIdentifiedVehicle({
-            plate: existingSubmission.vehicle,
-            fleet: 'North Region',
-            type: '2-Ton Pickup',
-            driver: 'Ali Hassan',
-        });
+        setIdentifiedVehicle(mockVehicles[existingSubmission.vehicle as keyof typeof mockVehicles]);
     }
 
     if (identifiedVehicle) {

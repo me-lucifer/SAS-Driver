@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { InfoRow } from "./info-row";
 import { Button } from "../ui/button";
@@ -9,9 +10,17 @@ type Vehicle = {
     fleet: string;
     type: string;
     driver: string | null;
+    lastOdometer: number;
 }
 
 export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+    
+    const odometerLink = `/odometer-capture?${new URLSearchParams({
+        lastOdometer: vehicle.lastOdometer.toString(),
+        plate: vehicle.plate,
+        type: vehicle.type,
+    })}`;
+
     return (
         <Card>
             <CardHeader>
@@ -25,7 +34,7 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
                 <InfoRow label="Assigned Driver" value={vehicle.driver || 'None'} />
             </CardContent>
             <CardFooter>
-                <Link href="/odometer-capture" className="w-full">
+                <Link href={odometerLink} className="w-full">
                     <Button className="w-full" size="lg">
                         Next: Odometer
                         <ArrowRight className="ml-2 h-4 w-4" />

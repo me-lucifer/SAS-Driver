@@ -4,59 +4,85 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InfoRow } from './info-row';
 import { StatusChip } from './status-chip';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import Image from 'next/image';
 import { Badge } from '../ui/badge';
-import { ArrowLeft, Check, Clock, Edit, ShieldAlert, User } from 'lucide-react';
+import { ArrowLeft, Check, Clock, Edit, ShieldAlert, User, FileWarning } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 
 const mockSubmissionData = {
     '1': {
         id: '1',
-        dateTime: new Date('2024-07-28T08:05:00'),
-        vehicle: { plate: 'A 12345', type: '2-Ton Pickup' },
-        odometer: 123456,
-        delta: 276,
-        photoUrl: 'https://picsum.photos/seed/1/600/400',
+        dateTime: subDays(new Date(), 1),
+        vehicle: { plate: 'A 12345', type: 'Van' },
+        odometer: 25650,
+        delta: 218,
+        photoUrl: 'https://picsum.photos/seed/sub1/600/400',
         location: 'Muscat, Oman',
-        notes: 'Tire pressure seems a bit low.',
-        ocr: { value: 123456, confidence: '98.7%' },
+        notes: 'Vehicle is clean.',
+        ocr: { value: 25650, confidence: '99.1%' },
         edits: null,
         reviewerNotes: null,
         status: 'Verified',
         history: [
-            { status: 'Verified', user: 'Admin', time: '2024-07-28T09:15:00', icon: Check },
-            { status: 'Submitted', user: 'Driver', time: '2024-07-28T08:05:00', icon: Edit },
+            { status: 'Verified', user: 'Admin', time: format(subDays(new Date(), 1), 'yyyy-MM-dd') + 'T09:15:00', icon: Check },
+            { status: 'Submitted', user: 'Driver', time: format(subDays(new Date(), 1), 'yyyy-MM-dd') + 'T08:05:00', icon: Edit },
         ]
     },
-    '3': {
-        id: '3',
-        dateTime: new Date('2024-07-26T07:58:00'),
-        vehicle: { plate: 'B 67890', type: 'Van' },
-        odometer: 89543,
-        delta: -10,
-        photoUrl: 'https://picsum.photos/seed/3/600/400',
-        location: 'Sohar, Oman',
+    '2': {
+        id: '2',
+        dateTime: subDays(new Date(), 2),
+        vehicle: { plate: 'A 12345', type: 'Van' },
+        odometer: 25432,
+        delta: 210,
+        photoUrl: 'https://picsum.photos/seed/sub2/600/400',
+        location: 'Barka, Oman',
         notes: '',
-        ocr: { value: 8953, confidence: '91.2%' },
-        edits: { reason: "OCR missed last digit", correctedValue: 89543 },
-        reviewerNotes: "Negative delta is unusual. Please double check vehicle assignment.",
+        ocr: { value: 25432, confidence: '98.5%' },
+        edits: null,
+        reviewerNotes: null,
+        status: 'Submitted',
+        history: [
+            { status: 'Submitted', user: 'Driver', time: format(subDays(new Date(), 2), 'yyyy-MM-dd') + 'T08:10:00', icon: Edit },
+        ]
+    },
+     '3': {
+        id: '3',
+        dateTime: subDays(new Date(), 3),
+        vehicle: { plate: 'B 67890', type: 'Truck' },
+        odometer: 55600,
+        delta: 100,
+        photoUrl: 'https://picsum.photos/seed/sub3/600/400',
+        location: 'Sohar, Oman',
+        notes: 'Scratched during delivery.',
+        ocr: { value: 5560, confidence: '85.2%' },
+        edits: { reason: "OCR missed last digit", correctedValue: 55600 },
+        reviewerNotes: "Low OCR confidence. Please verify reading on next check-in.",
         status: 'Flagged',
         history: [
-            { status: 'Flagged', user: 'Admin', time: '2024-07-26T10:02:00', icon: ShieldAlert },
-            { status: 'Submitted', user: 'Driver', time: '2024-07-26T07:58:00', icon: Edit },
+            { status: 'Flagged', user: 'Admin', time: format(subDays(new Date(), 3), 'yyyy-MM-dd') + 'T10:02:00', icon: FileWarning },
+            { status: 'Submitted', user: 'Driver', time: format(subDays(new Date(), 3), 'yyyy-MM-dd') + 'T07:58:00', icon: Edit },
         ]
     }
 };
-
-mockSubmissionData['2'] = { ...mockSubmissionData['1'], id: '2', date: new Date('2024-07-27T08:10:00'), odometer: 123180, delta: 251, edits: null, reviewerNotes: null, history: [{ status: 'Verified', user: 'Admin', time: '2024-07-27T09:00:00', icon: Check }, { status: 'Submitted', user: 'Driver', time: '2024-07-27T08:10:00', icon: Edit }] };
 
 export default function SubmissionDetailPage({ id }: { id: string }) {
     const submissionData = mockSubmissionData[id as keyof typeof mockSubmissionData];
     
     if (!submissionData) {
-        return <div>Submission not found</div>
+        return (
+            <div className="p-4 space-y-4 text-center">
+                 <h1 className="text-2xl font-bold">Submission Not Found</h1>
+                 <p className="text-muted-foreground">The submission you are looking for does not exist or could not be loaded.</p>
+                 <Link href="/submissions" passHref>
+                    <Button>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Submissions
+                    </Button>
+                </Link>
+            </div>
+        );
     }
 
     return (
@@ -105,7 +131,7 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
                         data-ai-hint="odometer reading"
                     />
                     <div className="space-y-1 text-sm">
-                        <InfoRow label="OCR Value" value={<div className='flex items-center gap-2'>{submissionData.ocr.value} <Badge variant="secondary">{submissionData.ocr.confidence}</Badge></div>} />
+                        <InfoRow label="OCR Value" value={<div className='flex items-center gap-2'>{submissionData.ocr.value.toLocaleString()} <Badge variant="secondary">{submissionData.ocr.confidence}</Badge></div>} />
                         {submissionData.edits && <InfoRow label="Edit Reason" value={submissionData.edits.reason} />}
                     </div>
                 </CardContent>

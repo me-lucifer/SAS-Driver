@@ -1,6 +1,8 @@
+
 "use client";
 
 import { useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InfoRow } from './info-row';
@@ -12,45 +14,47 @@ import { format } from 'date-fns';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useOnlineStatus } from '@/hooks/use-online-status';
-import { useRouter } from 'next/navigation';
 
-const submissionData = {
-    dateTime: new Date(),
-    vehicle: {
-        plate: 'A 12345',
-        type: '2-Ton Pickup',
-    },
-    odometer: 123456,
-    delta: 276,
-    photoUrl: 'https://picsum.photos/seed/1/600/400',
-    location: 'Muscat, Oman',
-    notes: 'Tire pressure seems a bit low.',
-};
 
 export default function ReviewSubmissionPage() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const submissionData = {
+        dateTime: new Date(),
+        vehicle: {
+            plate: searchParams.get('plate') || 'Unknown',
+            type: searchParams.get('type') || 'Vehicle',
+        },
+        odometer: parseInt(searchParams.get('odometer') || '0', 10),
+        delta: parseInt(searchParams.get('delta') || '0', 10),
+        photoUrl: `https://picsum.photos/seed/${Math.random()}/600/400`,
+        location: searchParams.get('location') || 'Muscat, Oman',
+        notes: searchParams.get('notes') || 'Tire pressure seems a bit low.',
+    };
+
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const isOnline = useOnlineStatus();
-    const router = useRouter();
-
-
+    
     const handleSubmit = () => {
         if (isConfirmed) {
+            const newSubmission = {
+                ...submissionData,
+                id: `offline-${Date.now()}`,
+                date: format(submissionData.dateTime, 'yyyy-MM-dd'),
+                vehicle: submissionData.vehicle.plate,
+                status: isOnline ? 'Submitted' : 'Offline',
+            };
+
             if (!isOnline) {
-                // Save to local storage if offline
                 const offlineSubmissions = JSON.parse(localStorage.getItem('offlineSubmissions') || '[]');
-                const newSubmission = {
-                    ...submissionData,
-                    id: `offline-${Date.now()}`,
-                    date: format(submissionData.dateTime, 'yyyy-MM-dd'),
-                    vehicle: submissionData.vehicle.plate,
-                    status: 'Offline',
-                };
                 offlineSubmissions.push(newSubmission);
                 localStorage.setItem('offlineSubmissions', JSON.stringify(offlineSubmissions));
             } else {
-                // In a real app, you would send the data to a server here.
-                console.log('Submitting data:', submissionData);
+                 const mockSubmissions = JSON.parse(localStorage.getItem('mockSubmissions') || '[]');
+                 mockSubmissions.unshift(newSubmission);
+                 localStorage.setItem('mockSubmissions', JSON.stringify(mockSubmissions));
             }
             setIsSubmitted(true);
         }
@@ -80,6 +84,8 @@ export default function ReviewSubmissionPage() {
         );
     }
 
+    const deltaStatus = submissionData.delta < 0 || submissionData.delta > 300 ? 'Warning' : 'Verified';
+
     return (
         <div className="p-4 space-y-4">
             <h1 className="text-2xl font-bold">Review & Submit</h1>
@@ -95,8 +101,8 @@ export default function ReviewSubmissionPage() {
                         <InfoRow label="Odometer" value={`${submissionData.odometer.toLocaleString()} km`} />
                         <InfoRow label="Delta" value={
                             <div className="flex items-center gap-2">
-                                {submissionData.delta} km
-                                <StatusChip status="Verified" />
+                                {submissionData.delta.toLocaleString()} km
+                                <StatusChip status={deltaStatus} />
                             </div>
                         } />
                         <InfoRow label="Location" value={submissionData.location} />
