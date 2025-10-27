@@ -98,22 +98,24 @@ export default function Home() {
           </Card>
         </Link>
         
-        <Card className="hover:bg-accent hover:border-primary transition-colors cursor-pointer">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                    <ListChecks className="h-6 w-6 text-primary" />
-                    My Submissions
-                </CardTitle>
-                <CardDescription>
-                    View your past odometer and other submissions.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Button variant="secondary" className="w-full">
-                    View History
-                </Button>
-            </CardContent>
-        </Card>
+        <Link href="/submissions" passHref>
+            <Card className="hover:bg-accent hover:border-primary transition-colors cursor-pointer">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-3">
+                        <ListChecks className="h-6 w-6 text-primary" />
+                        My Submissions
+                    </CardTitle>
+                    <CardDescription>
+                        View your past odometer and other submissions.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button variant="secondary" className="w-full">
+                        View History
+                    </Button>
+                </CardContent>
+            </Card>
+        </Link>
 
       </main>
     </div>
