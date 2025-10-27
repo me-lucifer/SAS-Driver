@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -9,15 +10,54 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import Link from 'next/link';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { format } from 'date-fns';
+
+// Mock submissions data, which would typically come from a database.
+const mockSubmissions = [
+    { id: '1', date: '2024-07-28', vehicle: 'A 12345', odometer: 123456, delta: 276, status: 'Verified' },
+    { id: '2', date: '2024-07-27', vehicle: 'A 12345', odometer: 123180, delta: 251, status: 'Verified' },
+    { id: '3', date: '2024-07-26', vehicle: 'B 67890', odometer: 89543, delta: -10, status: 'Flagged' },
+];
 
 export default function IdentifyVehiclePage() {
     const [identifiedVehicle, setIdentifiedVehicle] = useState(null);
     const [manualPlate, setManualPlate] = useState('');
+    const [existingSubmission, setExistingSubmission] = useState<any>(null);
+    const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
 
-    // Mock identification logic
+    const checkForExistingSubmission = (plate: string) => {
+        const today = format(new Date(), 'yyyy-MM-dd');
+        const submission = mockSubmissions.find(s => 
+            s.vehicle === plate && 
+            s.date === today && 
+            (s.status === 'Submitted' || s.status === 'Verified')
+        );
+        return submission;
+    };
+
+    const handleVehicleIdentification = (vehicleData: any) => {
+        const existing = checkForExistingSubmission(vehicleData.plate);
+        if (existing) {
+            setExistingSubmission(existing);
+            setShowDuplicateDialog(true);
+        } else {
+            setIdentifiedVehicle(vehicleData);
+        }
+    };
+
     const handleManualSubmit = () => {
         if (manualPlate) {
-            setIdentifiedVehicle({
+            handleVehicleIdentification({
                 plate: manualPlate,
                 fleet: 'North Region',
                 type: '2-Ton Pickup',
@@ -26,12 +66,20 @@ export default function IdentifyVehiclePage() {
         }
     };
     
-    // This function will be called by the camera components on successful scan
     const handleScanSuccess = (scanResult: string) => {
-        // In a real app, you'd use scanResult to fetch vehicle data
         console.log("Scan successful:", scanResult);
-        setIdentifiedVehicle({
+        handleVehicleIdentification({
             plate: 'A 12345',
+            fleet: 'North Region',
+            type: '2-Ton Pickup',
+            driver: 'Ali Hassan',
+        });
+    }
+
+    const proceedWithNewSubmission = () => {
+        setShowDuplicateDialog(false);
+        setIdentifiedVehicle({
+            plate: existingSubmission.vehicle,
             fleet: 'North Region',
             type: '2-Ton Pickup',
             driver: 'Ali Hassan',
@@ -81,6 +129,23 @@ export default function IdentifyVehiclePage() {
                     </Card>
                 </TabsContent>
             </Tabs>
+            
+            {/* Duplicate Submission Dialog */}
+            <AlertDialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Duplicate Submission Warning</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Today’s reading for this vehicle already exists (Δ +{existingSubmission?.delta} km). 
+                            Are you sure you want to create a new submission?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={proceedWithNewSubmission}>Continue Anyway</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
