@@ -19,7 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 
 function OdometerPhotoCard({ onRetake, onUse }: { onRetake: () => void; onUse: () => void; }) {
     const [imageSeed, setImageSeed] = useState(1);
-    const imageUrl = `https://picsum.photos/seed/odometer${imageSeed}/800/450`;
+    const imageUrl = `https://images.unsplash.com/photo-1612825175532-3a6953535249?w=800&h=450&fit=crop`;
 
     const handleRetake = () => {
         setImageSeed(Math.floor(Math.random() * 1000));
@@ -31,7 +31,7 @@ function OdometerPhotoCard({ onRetake, onUse }: { onRetake: () => void; onUse: (
             <CardContent className="p-0">
                 <Image
                     src={imageUrl}
-                    alt="Odometer placeholder"
+                    alt="Odometer close-up"
                     width={800}
                     height={450}
                     className="w-full aspect-video object-cover bg-muted"
@@ -222,3 +222,5 @@ export default function OdometerCapturePage() {
         </div>
     );
 }
+
+    

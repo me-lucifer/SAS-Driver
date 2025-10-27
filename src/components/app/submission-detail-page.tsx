@@ -86,7 +86,7 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
                     </CardHeader>
                     <CardContent>
                          <Image
-                            src={'https://picsum.photos/seed/odometer-sample/600/400'}
+                            src={'https://images.unsplash.com/photo-1612825175532-3a6953535249?w=600&h=400&fit=crop'}
                             alt="Odometer photo"
                             width={600}
                             height={400}
@@ -145,3 +145,5 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
         </div>
     );
 }
+
+    

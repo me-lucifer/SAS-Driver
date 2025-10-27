@@ -31,7 +31,7 @@ export default function ReviewSubmissionPage() {
         },
         odometer: parseInt(searchParams.get('odometer') || '0', 10),
         delta: parseInt(searchParams.get('delta') || '0', 10),
-        photoUrl: `https://picsum.photos/seed/${Math.random()}/600/400`,
+        photoUrl: `https://images.unsplash.com/photo-1612825175532-3a6953535249?w=600&h=400&fit=crop`,
         location: searchParams.get('location') || 'Muscat, Oman',
         notes: searchParams.get('notes') || 'Tire pressure seems a bit low.',
         flags: JSON.parse(searchParams.get('flags') || '[]'),
@@ -177,3 +177,5 @@ export default function ReviewSubmissionPage() {
         </div>
     );
 }
+
+    
