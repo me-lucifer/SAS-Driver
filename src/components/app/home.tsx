@@ -130,45 +130,45 @@ export default function Home() {
             </Card>
         )}
 
-        <div className="mb-5">
-        <Link href={sessionVehicle ? `/odometer-capture?lastOdometer=${sessionVehicle.lastOdometer}&plate=${sessionVehicle.plate}&type=${sessionVehicle.type}` : "/identify-vehicle"} passHref>
-          <Card className="hover:bg-muted/50 hover:border-primary/50 transition-colors cursor-pointer rounded-xl shadow-sm">
-              <CardHeader className="p-4">
-                  <CardTitle className="flex items-center gap-3">
-                      <Camera className="h-6 w-6 text-primary" />
-                      Odometer Capture
-                  </CardTitle>
-                  <CardDescription>
-                      Capture and submit your vehicle's starting odometer reading for the day.
-                  </CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                  <Button size="lg" className="w-full" disabled={!sessionVehicle}>
-                      Start Odometer Capture
-                  </Button>
-              </CardContent>
-          </Card>
-        </Link>
+        <div className="flex flex-col gap-5">
+            <Link href={sessionVehicle ? `/odometer-capture?lastOdometer=${sessionVehicle.lastOdometer}&plate=${sessionVehicle.plate}&type=${sessionVehicle.type}` : "/identify-vehicle"} passHref>
+              <Card className="hover:bg-muted/50 hover:border-primary/50 transition-colors cursor-pointer rounded-xl shadow-sm">
+                  <CardHeader className="p-5 md:p-6">
+                      <CardTitle className="flex items-center gap-3">
+                          <Camera className="h-6 w-6 text-primary" />
+                          Odometer Capture
+                      </CardTitle>
+                      <CardDescription>
+                          Capture and submit your vehicle's starting odometer reading for the day.
+                      </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+                      <Button size="lg" className="w-full" disabled={!sessionVehicle}>
+                          Start Odometer Capture
+                      </Button>
+                  </CardContent>
+              </Card>
+            </Link>
+            
+            <Link href="/submissions" passHref>
+                <Card className="hover:bg-muted/50 hover:border-primary/50 transition-colors cursor-pointer rounded-xl shadow-sm">
+                    <CardHeader className="p-5 md:p-6">
+                        <CardTitle className="flex items-center gap-3">
+                            <ListChecks className="h-6 w-6 text-primary" />
+                            My Submissions
+                        </CardTitle>
+                        <CardDescription>
+                            View your past odometer and other submissions.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-5 pt-0 md:p-6 md:pt-0">
+                        <Button variant="secondary" size="lg" className="w-full">
+                            View History
+                        </Button>
+                    </CardContent>
+                </Card>
+            </Link>
         </div>
-        
-        <Link href="/submissions" passHref>
-            <Card className="hover:bg-muted/50 hover:border-primary/50 transition-colors cursor-pointer rounded-xl shadow-sm">
-                <CardHeader className="p-4">
-                    <CardTitle className="flex items-center gap-3">
-                        <ListChecks className="h-6 w-6 text-primary" />
-                        My Submissions
-                    </CardTitle>
-                    <CardDescription>
-                        View your past odometer and other submissions.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                    <Button variant="secondary" size="lg" className="w-full">
-                        View History
-                    </Button>
-                </CardContent>
-            </Card>
-        </Link>
 
       </main>
     </div>
