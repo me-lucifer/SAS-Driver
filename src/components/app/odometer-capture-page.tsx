@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Camera } from 'lucide-react';
+import { Camera, ArrowLeft } from 'lucide-react';
 import { CameraView } from './camera-view';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../ui/card';
 import { Input } from '../ui/input';
@@ -45,8 +45,17 @@ export default function OdometerCapturePage() {
     }
 
     if (captureState === 'capturing') {
+        const backLink = `/identify-vehicle`;
         return (
             <div className="p-4 space-y-4">
+                <header className="flex items-center mb-4 -mx-4 px-4 h-14 border-b">
+                    <Link href={backLink} passHref>
+                        <Button variant="ghost" size="icon">
+                            <ArrowLeft />
+                        </Button>
+                    </Link>
+                    <h1 className="text-xl font-bold ml-2">Capture Odometer</h1>
+                </header>
                 <Card>
                     <CardHeader>
                         <CardTitle>Capture Odometer Reading</CardTitle>
@@ -73,7 +82,12 @@ export default function OdometerCapturePage() {
 
     return (
         <div className="p-4 space-y-4">
-            <h1 className="text-2xl font-bold">Review Odometer</h1>
+            <header className="flex items-center mb-4 -mx-4 px-4 h-14 border-b">
+                <Button variant="ghost" size="icon" onClick={() => setCaptureState('capturing')}>
+                    <ArrowLeft />
+                </Button>
+                <h1 className="text-xl font-bold ml-2">Review Odometer</h1>
+            </header>
             
             <CameraCard />
 

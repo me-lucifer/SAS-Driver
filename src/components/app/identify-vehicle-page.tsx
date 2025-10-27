@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Camera, Edit, QrCode } from "lucide-react";
+import { Camera, Edit, QrCode, ArrowLeft } from "lucide-react";
 import { CameraView } from './camera-view';
 import { VehicleCard } from './vehicle-card';
 import { Input } from '../ui/input';
@@ -84,12 +84,19 @@ export default function IdentifyVehiclePage() {
 
     return (
         <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Identify Vehicle</h1>
+            <header className="flex items-center mb-4 -mx-4 px-4 h-14 border-b">
+                 <Link href="/dashboard" passHref>
+                    <Button variant="ghost" size="icon">
+                        <ArrowLeft />
+                    </Button>
+                </Link>
+                <h1 className="text-xl font-bold ml-2">Identify Vehicle</h1>
+            </header>
             <Tabs defaultValue="scan-qr">
                 <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="scan-qr"><QrCode className="mr-2" />Scan QR</TabsTrigger>
-                    <TabsTrigger value="plate-ocr"><Camera className="mr-2" />Plate OCR</TabsTrigger>
-                    <TabsTrigger value="manual"><Edit className="mr-2" />Manual</TabsTrigger>
+                    <TabsTrigger value="scan-qr"><QrCode className="mr-2 h-4 w-4" />Scan QR</TabsTrigger>
+                    <TabsTrigger value="plate-ocr"><Camera className="mr-2 h-4 w-4" />Plate OCR</TabsTrigger>
+                    <TabsTrigger value="manual"><Edit className="mr-2 h-4 w-4" />Manual</TabsTrigger>
                 </TabsList>
                 <TabsContent value="scan-qr" className="mt-4">
                     <CameraView guide="qr" onScanSuccess={handleScanSuccess}/>

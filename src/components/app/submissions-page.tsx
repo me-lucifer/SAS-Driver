@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Calendar as CalendarIcon, ListFilter, Search, RefreshCw } from 'lucide-react';
+import { Calendar as CalendarIcon, ListFilter, Search, RefreshCw, ArrowLeft } from 'lucide-react';
 import { EmptyState } from './empty-state';
 import { FileText } from 'lucide-react';
 import { StatusChip } from './status-chip';
@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { useToast } from '@/hooks/use-toast';
 import { initialMockSubmissions } from '@/lib/mock-data';
+import Link from 'next/link';
 
 
 export default function SubmissionsPage() {
@@ -101,7 +102,14 @@ export default function SubmissionsPage() {
 
     return (
         <div className="p-4 space-y-4">
-            <h1 className="text-2xl font-bold">My Submissions</h1>
+             <header className="flex items-center mb-4 -mx-4 px-4 h-14 border-b">
+                 <Link href="/dashboard" passHref>
+                    <Button variant="ghost" size="icon">
+                        <ArrowLeft />
+                    </Button>
+                </Link>
+                <h1 className="text-xl font-bold ml-2">My Submissions</h1>
+            </header>
             
             <Card>
                 <CardHeader>

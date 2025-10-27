@@ -8,7 +8,7 @@ import { InfoRow } from './info-row';
 import { StatusChip } from './status-chip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { CheckCircle2, Home, FileText } from 'lucide-react';
+import { CheckCircle2, Home, FileText, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -69,12 +69,12 @@ export default function ReviewSubmissionPage() {
                 </p>
                 <div className="w-full space-y-3 max-w-sm">
                      <Button size="lg" className="w-full" variant="outline" onClick={() => router.push('/submissions')}>
-                        <FileText className="mr-2" />
+                        <FileText className="mr-2 h-4 w-4" />
                         View Submission
                     </Button>
                     <Link href="/dashboard" className="w-full block">
                         <Button size="lg" className="w-full">
-                            <Home className="mr-2" />
+                            <Home className="mr-2 h-4 w-4" />
                             Back to Home
                         </Button>
                     </Link>
@@ -85,9 +85,18 @@ export default function ReviewSubmissionPage() {
 
     const deltaStatus = submissionData.delta < 0 || submissionData.delta > 300 ? 'Warning' : 'Verified';
 
+    const backLink = `/odometer-capture?${searchParams.toString()}`;
+
     return (
         <div className="p-4 space-y-4">
-            <h1 className="text-2xl font-bold">Review & Submit</h1>
+             <header className="flex items-center mb-4 -mx-4 px-4 h-14 border-b">
+                 <Link href={backLink} passHref>
+                    <Button variant="ghost" size="icon">
+                        <ArrowLeft />
+                    </Button>
+                </Link>
+                <h1 className="text-xl font-bold ml-2">Review & Submit</h1>
+            </header>
 
             <Card>
                 <CardHeader>
@@ -126,7 +135,7 @@ export default function ReviewSubmissionPage() {
                 </CardContent>
             </Card>
 
-            <div className="p-4 space-y-4 bg-card rounded-2xl border">
+            <div className="p-4 space-y-4 bg-card rounded-lg border">
                 <div className="flex items-start space-x-3">
                     <Checkbox id="confirmation" className="mt-1" checked={isConfirmed} onCheckedChange={(checked) => setIsConfirmed(checked as boolean)} />
                     <Label htmlFor="confirmation" className="font-medium text-sm leading-snug cursor-pointer">
