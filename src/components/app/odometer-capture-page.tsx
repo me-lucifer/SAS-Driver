@@ -14,7 +14,6 @@ import { StatusChip } from './status-chip';
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
 import { RefreshCw } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 
@@ -126,15 +125,12 @@ export default function OdometerCapturePage() {
     }
 
     if (captureState === 'capturing') {
-        const backLink = `/identify-vehicle`;
         return (
             <div className="flex flex-col h-full">
-                <header className="flex items-center p-4 border-b h-16 shrink-0">
-                    <Link href={backLink} passHref>
-                        <Button variant="ghost" size="icon" aria-label="Back">
-                            <ArrowLeft />
-                        </Button>
-                    </Link>
+                <header className="flex items-center p-4 border-b h-16 shrink-0 gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Back">
+                        <ArrowLeft />
+                    </Button>
                     <h1 className="text-xl font-bold ml-2">Capture Odometer</h1>
                 </header>
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -156,15 +152,15 @@ export default function OdometerCapturePage() {
     
     return (
         <div className="flex flex-col h-full">
-            <header className="flex items-center p-4 border-b h-16 shrink-0">
-                 <Button variant="ghost" size="icon" onClick={() => setCaptureState('capturing')} aria-label="Back">
+            <header className="flex items-center p-4 border-b h-16 shrink-0 gap-2">
+                 <Button variant="ghost" size="icon" onClick={() => setCaptureState('capturing')} aria-label="Back to Capture">
                     <ArrowLeft />
                 </Button>
                 <h1 className="text-xl font-bold ml-2">Review Odometer</h1>
             </header>
             
             <main className="flex-1 overflow-y-auto p-4 space-y-4">
-                <OdometerPhotoCard onRetake={() => {}} onUse={handleValidationAndSubmit} />
+                <OdometerPhotoCard onRetake={() => {}} onUse={() => {}} />
 
                 <Card>
                     <CardHeader>

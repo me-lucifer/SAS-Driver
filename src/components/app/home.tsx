@@ -35,23 +35,28 @@ export default function Home() {
     // Check for vehicle in local storage
     const storedVehicle = localStorage.getItem('sessionVehicle');
     if (storedVehicle) {
-      setSessionVehicle(JSON.parse(storedVehicle));
+      const vehicle = JSON.parse(storedVehicle);
+      setSessionVehicle(vehicle);
+
+      // Check if submission for today exists for this vehicle
+      const submissionToday = localStorage.getItem('submissionToday') === 'true';
+      const submissionVehicle = localStorage.getItem('submissionTodayVehicle');
+      if (submissionToday && submissionVehicle === vehicle.plate) {
+          setOdometerSubmitted(true);
+      } else {
+          setOdometerSubmitted(false);
+      }
+    } else {
+        setSessionVehicle(null);
+        setOdometerSubmitted(false);
     }
-
-    // Check if submission for today exists
-    const submissions = JSON.parse(localStorage.getItem('mockSubmissions') || '[]');
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const todaySubmission = submissions.find((sub: any) => sub.date === today && sub.vehicle === JSON.parse(storedVehicle || '{}').plate);
-
-    if (todaySubmission) {
-      setOdometerSubmitted(true);
-    }
-
   }, []);
 
   const handleLogout = async () => {
     await auth.signOut();
     localStorage.removeItem('sessionVehicle');
+    localStorage.removeItem('submissionToday');
+    localStorage.removeItem('submissionTodayVehicle');
     router.push('/welcome');
   };
 

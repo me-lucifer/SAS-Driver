@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera, Edit, QrCode, ArrowLeft } from "lucide-react";
 import { CameraView } from './camera-view';
@@ -33,6 +33,13 @@ export default function IdentifyVehiclePage() {
     const { toast } = useToast();
     const router = useRouter();
 
+    useEffect(() => {
+        const storedVehicle = localStorage.getItem('sessionVehicle');
+        if (storedVehicle) {
+            setIdentifiedVehicle(JSON.parse(storedVehicle));
+        }
+    }, []);
+
 
     const checkForExistingSubmission = (plate: string) => {
         const today = format(new Date(), 'yyyy-MM-dd');
@@ -56,16 +63,15 @@ export default function IdentifyVehiclePage() {
             return;
         }
 
-        toast({
-            title: "Vehicle Identified",
-            description: `Vehicle ${vehicleData.plate} linked to this session.`
-        });
-
         const existing = checkForExistingSubmission(vehicleData.plate);
         if (existing) {
             setExistingSubmission(existing);
             setShowDuplicateDialog(true);
         } else {
+            toast({
+                title: "Vehicle Identified",
+                description: `Vehicle ${vehicleData.plate} linked to this session.`
+            });
             // Set session vehicle in local storage
             localStorage.setItem('sessionVehicle', JSON.stringify(vehicleData));
             setIdentifiedVehicle(vehicleData);
@@ -91,6 +97,10 @@ export default function IdentifyVehiclePage() {
         const vehicleData = mockVehicles[existingSubmission.vehicle as keyof typeof mockVehicles]
         localStorage.setItem('sessionVehicle', JSON.stringify(vehicleData));
         setIdentifiedVehicle(vehicleData);
+         toast({
+            title: "Vehicle Identified",
+            description: `Vehicle ${vehicleData.plate} linked to this session.`
+        });
     }
     
     const handleChangeVehicle = () => {
@@ -100,63 +110,63 @@ export default function IdentifyVehiclePage() {
 
     if (identifiedVehicle) {
         return (
-            <div className="p-4 space-y-4">
-                <header className="flex items-center mb-4 -mx-4 px-4 h-14 border-b">
-                    <Link href="/dashboard" passHref>
-                        <Button variant="ghost" size="icon">
-                            <ArrowLeft />
-                        </Button>
-                    </Link>
+             <div className="flex flex-col h-full">
+                <header className="flex items-center p-4 border-b h-16 shrink-0 gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard')} aria-label="Back">
+                        <ArrowLeft />
+                    </Button>
                     <h1 className="text-xl font-bold ml-2">Vehicle Identified</h1>
                 </header>
-                <VehicleCard vehicle={identifiedVehicle} onChangeVehicle={handleChangeVehicle} />
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    <VehicleCard vehicle={identifiedVehicle} onChangeVehicle={handleChangeVehicle} />
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="p-4">
-            <header className="flex items-center mb-4 -mx-4 px-4 h-14 border-b">
-                 <Link href="/dashboard" passHref>
-                    <Button variant="ghost" size="icon">
-                        <ArrowLeft />
-                    </Button>
-                </Link>
+        <div className="flex flex-col h-full">
+            <header className="flex items-center p-4 border-b h-16 shrink-0 gap-2">
+                 <Button variant="ghost" size="icon" onClick={() => router.push('/dashboard')} aria-label="Back">
+                    <ArrowLeft />
+                </Button>
                 <h1 className="text-xl font-bold ml-2">Identify Vehicle</h1>
             </header>
-            <Tabs defaultValue="scan-qr" className="flex-1 flex flex-col">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="scan-qr"><QrCode className="mr-2 h-4 w-4" />Scan QR</TabsTrigger>
-                    <TabsTrigger value="plate-ocr"><Camera className="mr-2 h-4 w-4" />Plate OCR</TabsTrigger>
-                    <TabsTrigger value="manual"><Edit className="mr-2 h-4 w-4" />Manual</TabsTrigger>
-                </TabsList>
-                <TabsContent value="scan-qr" className="mt-4 flex-1">
-                    <CameraView guide="qr" onScanSuccess={handleScanSuccess}/>
-                </TabsContent>
-                <TabsContent value="plate-ocr" className="mt-4 flex-1">
-                    <CameraView guide="plate" onScanSuccess={handleScanSuccess}/>
-                     <Link href="#" className="text-sm text-center block mt-4 text-primary underline" onClick={() => (document.querySelector('[data-radix-collection-item][value="manual"]') as HTMLElement)?.click()}>
-                        OCR failed? Enter manually
-                    </Link>
-                </TabsContent>
-                <TabsContent value="manual" className="mt-4 flex-1">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Enter Plate Number</CardTitle>
-                            <CardDescription>Enter the vehicle plate number below.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <Input 
-                                placeholder="e.g., A 12345" 
-                                value={manualPlate}
-                                onChange={(e) => setManualPlate(e.target.value)}
-                                autoCapitalize="characters"
-                            />
-                            <Button className="w-full" size="lg" onClick={handleManualSubmit}>Submit</Button>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+            <main className="flex-1 overflow-y-auto p-4">
+                <Tabs defaultValue="scan-qr" className="flex-1 flex flex-col">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="scan-qr"><QrCode className="mr-2 h-4 w-4" />Scan QR</TabsTrigger>
+                        <TabsTrigger value="plate-ocr"><Camera className="mr-2 h-4 w-4" />Plate OCR</TabsTrigger>
+                        <TabsTrigger value="manual"><Edit className="mr-2 h-4 w-4" />Manual</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="scan-qr" className="mt-4 flex-1">
+                        <CameraView guide="qr" onScanSuccess={handleScanSuccess}/>
+                    </TabsContent>
+                    <TabsContent value="plate-ocr" className="mt-4 flex-1">
+                        <CameraView guide="plate" onScanSuccess={handleScanSuccess}/>
+                         <Link href="#" className="text-sm text-center block mt-4 text-primary underline" onClick={() => (document.querySelector('[data-radix-collection-item][value="manual"]') as HTMLElement)?.click()}>
+                            OCR failed? Enter manually
+                        </Link>
+                    </TabsContent>
+                    <TabsContent value="manual" className="mt-4 flex-1">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Enter Plate Number</CardTitle>
+                                <CardDescription>Enter the vehicle plate number below.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <Input 
+                                    placeholder="e.g., A 12345" 
+                                    value={manualPlate}
+                                    onChange={(e) => setManualPlate(e.target.value)}
+                                    autoCapitalize="characters"
+                                />
+                                <Button className="w-full" size="lg" onClick={handleManualSubmit}>Submit</Button>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
+            </main>
             
             <AlertDialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
                 <AlertDialogContent>

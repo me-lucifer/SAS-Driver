@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,21 +11,31 @@ import { ArrowLeft, Clock, TriangleAlert, User } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { mockSubmissionDetails } from '@/lib/mock-data';
+import { useRouter } from 'next/navigation';
 
 export default function SubmissionDetailPage({ id }: { id: string }) {
     const submissionData = mockSubmissionDetails[id as keyof typeof mockSubmissionDetails];
+    const router = useRouter();
     
     if (!submissionData) {
         return (
-            <div className="p-4 space-y-4 text-center">
-                 <h1 className="text-2xl font-bold">Submission Not Found</h1>
-                 <p className="text-muted-foreground">The submission you are looking for does not exist or could not be loaded.</p>
-                 <Link href="/submissions" passHref>
-                    <Button>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Submissions
+            <div className="flex flex-col h-full">
+                <header className="flex items-center p-4 border-b h-16 shrink-0 gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => router.push('/submissions')} aria-label="Back">
+                        <ArrowLeft />
                     </Button>
-                </Link>
+                    <h1 className="text-xl font-bold flex-1">Error</h1>
+                </header>
+                <div className="p-4 space-y-4 text-center flex-1 flex flex-col items-center justify-center">
+                     <h1 className="text-2xl font-bold">Submission Not Found</h1>
+                     <p className="text-muted-foreground">The submission you are looking for does not exist or could not be loaded.</p>
+                     <Link href="/submissions" passHref>
+                        <Button>
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to Submissions
+                        </Button>
+                    </Link>
+                </div>
             </div>
         );
     }
@@ -32,11 +43,9 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
     return (
         <div className="flex flex-col h-full">
              <header className="flex items-center p-4 border-b h-16 shrink-0 gap-2">
-                 <Link href="/submissions" passHref>
-                    <Button variant="ghost" size="icon">
-                        <ArrowLeft />
-                    </Button>
-                </Link>
+                <Button variant="ghost" size="icon" onClick={() => router.push('/submissions')} aria-label="Back">
+                    <ArrowLeft />
+                </Button>
                 <h1 className="text-xl font-bold flex-1">Submission Details</h1>
             </header>
 
