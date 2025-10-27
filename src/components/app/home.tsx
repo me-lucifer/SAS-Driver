@@ -79,22 +79,24 @@ export default function Home() {
             </Card>
         )}
 
-        <Card className="hover:bg-accent hover:border-primary transition-colors cursor-pointer">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                    <Camera className="h-6 w-6 text-primary" />
-                    Odometer Capture
-                </CardTitle>
-                <CardDescription>
-                    Capture and submit your vehicle's starting odometer reading for the day.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Button className="w-full">
-                    Open Camera
-                </Button>
-            </CardContent>
-        </Card>
+        <Link href="/identify-vehicle" passHref>
+          <Card className="hover:bg-accent hover:border-primary transition-colors cursor-pointer">
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                      <Camera className="h-6 w-6 text-primary" />
+                      Odometer Capture
+                  </CardTitle>
+                  <CardDescription>
+                      Capture and submit your vehicle's starting odometer reading for the day.
+                  </CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <Button className="w-full">
+                      Start
+                  </Button>
+              </CardContent>
+          </Card>
+        </Link>
         
         <Card className="hover:bg-accent hover:border-primary transition-colors cursor-pointer">
             <CardHeader>
