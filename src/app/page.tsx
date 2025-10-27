@@ -1,23 +1,25 @@
 "use client";
 
 import { useState } from 'react';
-import { Map, PackageCheck, CircleDashed, MessageSquare } from 'lucide-react';
+import { Map, PackageCheck, CircleDashed, MessageSquare, LayoutGrid } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import RoutePage from '@/components/app/route-page';
 import DeliveryPage from '@/components/app/delivery-page';
 import StatusPage from '@/components/app/status-page';
 import MessagesPage from '@/components/app/messages-page';
+import UIKitPage from '@/components/app/uikit-page';
 
 const TABS = {
   ROUTE: 'route',
   DELIVERY: 'delivery',
   STATUS: 'status',
   MESSAGES: 'messages',
+  UIKIT: 'uikit',
 };
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState(TABS.ROUTE);
+  const [activeTab, setActiveTab] = useState(TABS.UIKIT);
 
   const getHeaderTitle = () => {
     switch (activeTab) {
@@ -29,6 +31,8 @@ export default function Home() {
         return 'Update Status';
       case TABS.MESSAGES:
         return 'Dispatch';
+      case TABS.UIKIT:
+        return 'UI Kit';
       default:
         return 'SAS Driver';
     }
@@ -58,9 +62,12 @@ export default function Home() {
             <TabsContent value={TABS.MESSAGES} className="mt-0 data-[state=inactive]:hidden">
               <MessagesPage />
             </TabsContent>
+             <TabsContent value={TABS.UIKIT} className="mt-0 data-[state=inactive]:hidden">
+              <UIKitPage />
+            </TabsContent>
         </main>
         
-        <TabsList className="grid w-full grid-cols-4 h-16 rounded-none mt-auto bg-card border-t p-0">
+        <TabsList className="grid w-full grid-cols-5 h-16 rounded-none mt-auto bg-card border-t p-0">
           <TabsTrigger value={TABS.ROUTE} className="h-full flex flex-col gap-1 rounded-none data-[state=active]:text-primary data-[state=active]:border-t-2 data-[state=active]:border-primary data-[state=active]:bg-accent focus-visible:ring-inset">
             <Map className="h-5 w-5" />
             <span className="text-xs">Route</span>
@@ -76,6 +83,10 @@ export default function Home() {
           <TabsTrigger value={TABS.MESSAGES} className="h-full flex flex-col gap-1 rounded-none data-[state=active]:text-primary data-[state=active]:border-t-2 data-[state=active]:border-primary data-[state=active]:bg-accent focus-visible:ring-inset">
             <MessageSquare className="h-5 w-5" />
             <span className="text-xs">Messages</span>
+          </TabsTrigger>
+          <TabsTrigger value={TABS.UIKIT} className="h-full flex flex-col gap-1 rounded-none data-[state=active]:text-primary data-[state=active]:border-t-2 data-[state=active]:border-primary data-[state=active]:bg-accent focus-visible:ring-inset">
+            <LayoutGrid className="h-5 w-5" />
+            <span className="text-xs">UI Kit</span>
           </TabsTrigger>
         </TabsList>
       </Tabs>

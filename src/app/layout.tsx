@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { PhoneFrame } from '@/components/phone-frame';
+import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
   title: 'SAS Driver',
@@ -23,6 +24,7 @@ export default function RootLayout({
         <PhoneFrame>
           {children}
         </PhoneFrame>
+        <Toaster />
       </body>
     </html>
   );
