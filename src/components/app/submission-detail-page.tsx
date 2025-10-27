@@ -1,22 +1,55 @@
 
 "use client";
 
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InfoRow } from './info-row';
 import { StatusChip } from './status-chip';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { Badge } from '../ui/badge';
-import { ArrowLeft, Clock, TriangleAlert, User } from 'lucide-react';
+import { ArrowLeft, Clock, TriangleAlert, User, FileWarning, Edit, Check } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '../ui/button';
-import { mockSubmissionDetails } from '@/lib/mock-data';
+import { mockSubmissionDetails as initialMockDetails } from '@/lib/mock-data';
 import { useRouter } from 'next/navigation';
 
+const iconMap: Record<string, React.ElementType> = {
+    Verified: Check,
+    Submitted: Edit,
+    Flagged: FileWarning,
+    default: Edit,
+};
+
 export default function SubmissionDetailPage({ id }: { id: string }) {
-    const submissionData = mockSubmissionDetails[id as keyof typeof mockSubmissionDetails];
+    const [submissionData, setSubmissionData] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     
+    useEffect(() => {
+        // Combine initial mock data with data from local storage
+        const storedDetails = JSON.parse(localStorage.getItem('mockSubmissionDetails') || '{}');
+        const allDetails = { ...initialMockDetails, ...storedDetails };
+        const data = allDetails[id];
+        
+        setSubmissionData(data);
+        setIsLoading(false);
+    }, [id]);
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col h-full">
+                 <header className="flex items-center p-4 border-b h-16 shrink-0 gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => router.push('/submissions')} aria-label="Back">
+                        <ArrowLeft />
+                    </Button>
+                    <h1 className="text-xl font-bold flex-1">Loading...</h1>
+                </header>
+                <div className="p-4 text-center">Loading submission details...</div>
+            </div>
+        )
+    }
+
     if (!submissionData) {
         return (
             <div className="flex flex-col h-full">
@@ -119,7 +152,7 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
                     <CardContent>
                         <div className="space-y-4">
                             {submissionData.history.map((item: any, index: number) => {
-                                 const Icon = item.icon;
+                                 const Icon = iconMap[item.status] || iconMap.default;
                                  return (
                                     <div key={index} className="flex gap-4">
                                         <div className="flex flex-col items-center">
@@ -145,6 +178,3 @@ export default function SubmissionDetailPage({ id }: { id: string }) {
         </div>
     );
 }
-
-    
-

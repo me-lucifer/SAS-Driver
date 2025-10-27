@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { InfoRow } from './info-row';
 import { StatusChip } from './status-chip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { CheckCircle2, Home, FileText, ArrowLeft, TriangleAlert } from 'lucide-react';
+import { CheckCircle2, Home, FileText, ArrowLeft, TriangleAlert, Edit, User, FileWarning } from 'lucide-react';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -30,10 +30,12 @@ export default function ReviewSubmissionPage() {
             type: searchParams.get('type') || 'Vehicle',
         },
         odometer: parseInt(searchParams.get('odometer') || '0', 10),
+        lastOdometer: parseInt(searchParams.get('lastOdometer') || '0', 10),
         delta: parseInt(searchParams.get('delta') || '0', 10),
         photoUrl: `https://images.unsplash.com/photo-1612825175532-3a6953535249?w=600&h=400&fit=crop&q=80`,
         location: searchParams.get('location') || 'Muscat, Oman',
-        notes: searchParams.get('notes') || 'Tire pressure seems a bit low.',
+        notes: searchParams.get('notes') || '',
+        confidence: parseFloat(searchParams.get('confidence') || '0'),
         flags: JSON.parse(searchParams.get('flags') || '[]'),
     };
 
@@ -43,21 +45,50 @@ export default function ReviewSubmissionPage() {
     
     const handleSubmit = () => {
         if (isConfirmed) {
-            const newSubmission = {
-                id: isOnline ? `synced-${Date.now()}`: `offline-${Date.now()}`,
+            const newId = isOnline ? `synced-${Date.now()}`: `offline-${Date.now()}`;
+            const newStatus = submissionData.flags.length > 0 ? 'Flagged' : (isOnline ? 'Submitted' : 'Offline');
+
+            const newSubmissionListItem = {
+                id: newId,
                 date: format(submissionData.dateTime, 'yyyy-MM-dd'),
                 vehicle: submissionData.vehicle.plate,
                 odometer: submissionData.odometer,
                 delta: submissionData.delta,
-                status: submissionData.flags.length > 0 ? 'Flagged' : (isOnline ? 'Submitted' : 'Offline'),
+                status: newStatus,
             };
 
-            const storageKey = isOnline ? 'mockSubmissions' : 'offlineSubmissions';
-            const existingSubmissions = JSON.parse(localStorage.getItem(storageKey) || '[]');
-            existingSubmissions.unshift(newSubmission);
-            localStorage.setItem(storageKey, JSON.stringify(existingSubmissions));
+            const newSubmissionDetail = {
+                id: newId,
+                dateTime: submissionData.dateTime.toISOString(),
+                vehicle: submissionData.vehicle,
+                odometer: submissionData.odometer,
+                delta: submissionData.delta,
+                photoUrl: submissionData.photoUrl,
+                location: submissionData.location,
+                notes: submissionData.notes,
+                ocr: { value: submissionData.odometer, confidence: `${submissionData.confidence}%` },
+                edits: null, 
+                reviewerNotes: null,
+                flags: submissionData.flags,
+                status: newStatus,
+                history: [
+                    { status: newStatus, user: 'Driver', time: submissionData.dateTime.toISOString(), icon: newStatus === 'Flagged' ? FileWarning : Edit },
+                ]
+            };
 
-            // Also mark today's submission as done in local storage to hide reminder
+            // Save list item
+            const listStorageKey = 'mockSubmissions';
+            const existingSubmissions = JSON.parse(localStorage.getItem(listStorageKey) || '[]');
+            existingSubmissions.unshift(newSubmissionListItem);
+            localStorage.setItem(listStorageKey, JSON.stringify(existingSubmissions));
+            
+            // Save detail item
+            const detailStorageKey = 'mockSubmissionDetails';
+            const existingDetails = JSON.parse(localStorage.getItem(detailStorageKey) || '{}');
+            existingDetails[newId] = newSubmissionDetail;
+            localStorage.setItem(detailStorageKey, JSON.stringify(existingDetails));
+
+            // Mark today's submission as done
             localStorage.setItem('submissionDate', format(new Date(), 'yyyy-MM-dd'));
             localStorage.setItem('submissionVehiclePlate', submissionData.vehicle.plate);
 
@@ -154,7 +185,7 @@ export default function ReviewSubmissionPage() {
                     <CardContent>
                          <Image
                             src={submissionData.photoUrl}
-                            alt="Odometer photo"
+                            alt="odometer close-up"
                             width={600}
                             height={400}
                             className="w-full aspect-[3/2] object-cover rounded-md bg-muted"
@@ -178,6 +209,3 @@ export default function ReviewSubmissionPage() {
         </div>
     );
 }
-
-    
-

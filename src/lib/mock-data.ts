@@ -41,7 +41,7 @@ export const initialMockSubmissions: any[] = [
 export const mockSubmissionDetails: Record<string, any> = {
     '1': {
         id: '1',
-        dateTime: new Date(`${CURRENT_YEAR}-10-27T08:05:00`),
+        dateTime: new Date(`${CURRENT_YEAR}-10-27T08:05:00`).toISOString(),
         vehicle: { plate: 'A 12345', type: 'Van' },
         odometer: 25650,
         delta: 218,
@@ -54,13 +54,13 @@ export const mockSubmissionDetails: Record<string, any> = {
         flags: [],
         status: 'Verified',
         history: [
-            { status: 'Verified', user: 'Admin', time: new Date(`${CURRENT_YEAR}-10-27T09:15:00`), icon: Check },
-            { status: 'Submitted', user: 'Driver', time: new Date(`${CURRENT_YEAR}-10-27T08:05:00`), icon: Edit },
+            { status: 'Verified', user: 'Admin', time: new Date(`${CURRENT_YEAR}-10-27T09:15:00`).toISOString(), icon: Check },
+            { status: 'Submitted', user: 'Driver', time: new Date(`${CURRENT_YEAR}-10-27T08:05:00`).toISOString(), icon: Edit },
         ]
     },
     '2': {
         id: '2',
-        dateTime: new Date(`${CURRENT_YEAR}-10-26T08:10:00`),
+        dateTime: new Date(`${CURRENT_YEAR}-10-26T08:10:00`).toISOString(),
         vehicle: { plate: 'A 12345', type: 'Van' },
         odometer: 25432,
         delta: 210,
@@ -73,12 +73,12 @@ export const mockSubmissionDetails: Record<string, any> = {
         flags: [],
         status: 'Submitted',
         history: [
-            { status: 'Submitted', user: 'Driver', time: new Date(`${CURRENT_YEAR}-10-26T08:10:00`), icon: Edit },
+            { status: 'Submitted', user: 'Driver', time: new Date(`${CURRENT_YEAR}-10-26T08:10:00`).toISOString(), icon: Edit },
         ]
     },
      '3': {
         id: '3',
-        dateTime: new Date(`${CURRENT_YEAR}-10-25T07:58:00`),
+        dateTime: new Date(`${CURRENT_YEAR}-10-25T07:58:00`).toISOString(),
         vehicle: { plate: 'B 67890', type: 'Truck' },
         odometer: 55600,
         delta: 100,
@@ -91,8 +91,8 @@ export const mockSubmissionDetails: Record<string, any> = {
         status: 'Flagged',
         flags: ["Low OCR"],
         history: [
-            { status: 'Flagged', user: 'System', time: new Date(`${CURRENT_YEAR}-10-25T07:59:00`), icon: FileWarning },
-            { status: 'Submitted', user: 'Driver', time: new Date(`${CURRENT_YEAR}-10-25T07:58:00`), icon: Edit },
+            { status: 'Flagged', user: 'System', time: new Date(`${CURRENT_YEAR}-10-25T07:59:00`).toISOString(), icon: FileWarning },
+            { status: 'Submitted', user: 'Driver', time: new Date(`${CURRENT_YEAR}-10-25T07:58:00`).toISOString(), icon: Edit },
         ]
     }
 };
